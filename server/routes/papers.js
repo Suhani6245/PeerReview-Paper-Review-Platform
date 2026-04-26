@@ -432,11 +432,28 @@ router.get('/paper/:id/download', authenticate, async (req, res) => {
     }
 
     console.log('[FETCHING_CLOUDINARY]', fileUrl);
-    const response = await axios.get(fileUrl, { responseType: 'stream' });
-    if (response.status !== 200) {
-      return res.status(response.status).json({
+    let response;
+    try {
+      response = await axios.get(fileUrl, {
+        responseType: 'stream',
+        validateStatus: null,
+      });
+    } catch (fetchErr) {
+      console.error('[DOWNLOAD_FETCH_ERROR]', fetchErr.stack || fetchErr);
+      if (!res.headersSent) {
+        return res.status(502).json({
+          success: false,
+          message: 'Failed to fetch PDF from storage.',
+          detail: fetchErr.message,
+        });
+      }
+    }
+
+    if (!response || response.status !== 200) {
+      return res.status(response?.status || 502).json({
         success: false,
         message: 'Cloudinary file download failed.',
+        detail: response ? `${response.status} ${response.statusText}` : 'No response',
       });
     }
 
@@ -449,9 +466,12 @@ router.get('/paper/:id/download', authenticate, async (req, res) => {
 
     await streamPipeline(response.data, res);
   } catch (err) {
-    console.error('[DOWNLOAD_PAPER_ERROR]', err);
+    console.error('[DOWNLOAD_PAPER_ERROR]', err.stack || err);
     if (!res.headersSent) {
-      res.status(500).json({ success: false, message: 'Download failed.' });
+      res.status(500).json({
+        success: false,
+        message: err.message || 'Download failed.',
+      });
     }
   }
 });
