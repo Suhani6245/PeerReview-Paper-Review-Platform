@@ -388,5 +388,18 @@ function initStars(containerId, inputId) {
 
 function pdfUrl(fileUrl) {
   if (!fileUrl) return '#';
-  return fileUrl; // Cloudinary URL used directly
+
+  // If it's a Cloudinary URL, add download parameters
+  if (fileUrl.includes('cloudinary.com')) {
+    // Add fl_attachment to force download instead of opening in browser
+    return fileUrl.replace('/upload/', '/upload/fl_attachment/');
+  }
+
+  // If it's a local file path, use the download API route
+  if (fileUrl.startsWith('/uploads/') || !fileUrl.includes('://')) {
+    const filename = fileUrl.replace('/uploads/', '');
+    return '/api/download/' + filename;
+  }
+
+  return fileUrl; // Fallback for other URLs
 }
