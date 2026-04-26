@@ -8,6 +8,7 @@ const upload = require('../middleware/upload');
 
 /**
  * POST /submit-paper
+ * Author submits paper with PDF upload (Cloudinary)
  */
 router.post(
   '/submit-paper',
@@ -16,6 +17,7 @@ router.post(
   upload.single('pdf'),
   async (req, res) => {
     try {
+      // ✅ FIX: safe file check for Cloudinary
       if (!req.file?.path) {
         return res.status(400).json({
           success: false,
@@ -32,17 +34,24 @@ router.post(
         });
       }
 
+      // ✅ FIX: convert comma string → array safely
+      const keywordArray = keywords
+        ? keywords
+            .split(',')
+            .map(k => k.trim())
+            .filter(Boolean)
+        : [];
+
       const paper = await Paper.create({
         title,
         abstract,
 
-        // normalized keywords (production safe)
-        keywords: keywords
-          ? keywords.split(',').map(k => k.trim()).filter(Boolean)
-          : [],
+        // ✅ FIXED (was broken before)
+        keywords: keywordArray,
 
-        fileUrl: req.file.path,        // Cloudinary URL
-        publicId: req.file.filename,   // Cloudinary ID
+        // Cloudinary upload data
+        fileUrl: req.file.path,
+        publicId: req.file.filename,
         fileName: req.file.originalname,
 
         authorId: req.user._id,

@@ -388,5 +388,5 @@ function initStars(containerId, inputId) {
 
 function pdfUrl(fileUrl) {
   if (!fileUrl) return '#';
-  return API_BASE + '/download/' + encodeURIComponent(fileUrl);
+  return fileUrl; // Cloudinary URL used directly
 }
