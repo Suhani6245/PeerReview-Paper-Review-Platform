@@ -1,4 +1,3 @@
-// routes/papers.js
 const express = require('express');
 const router = express.Router();
 const Paper = require('../models/Paper');
@@ -9,7 +8,6 @@ const upload = require('../middleware/upload');
 
 /**
  * POST /submit-paper
- * Author submits a new paper with PDF upload
  */
 router.post(
   '/submit-paper',
@@ -18,29 +16,35 @@ router.post(
   upload.single('pdf'),
   async (req, res) => {
     try {
-      if (!req.file) {
-        return res
-          .status(400)
-          .json({ success: false, message: 'PDF file is required.' });
+      if (!req.file?.path) {
+        return res.status(400).json({
+          success: false,
+          message: 'PDF file is required or upload failed.',
+        });
       }
 
       const { title, abstract, keywords } = req.body;
 
       if (!title || !abstract) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: 'Title and abstract are required.',
-          });
+        return res.status(400).json({
+          success: false,
+          message: 'Title and abstract are required.',
+        });
       }
 
       const paper = await Paper.create({
         title,
         abstract,
-        keywords: keywords || '',
-        fileUrl: req.file.filename,
+
+        // normalized keywords (production safe)
+        keywords: keywords
+          ? keywords.split(',').map(k => k.trim()).filter(Boolean)
+          : [],
+
+        fileUrl: req.file.path,        // Cloudinary URL
+        publicId: req.file.filename,   // Cloudinary ID
         fileName: req.file.originalname,
+
         authorId: req.user._id,
         status: 'pending',
       });
@@ -53,29 +57,18 @@ router.post(
         paper,
       });
     } catch (err) {
-      if (err.message === 'Only PDF files are allowed!') {
-        return res.status(400).json({ success: false, message: err.message });
-      }
-      if (err.name === 'ValidationError') {
-        const messages = Object.values(err.errors).map((e) => e.message);
-        return res
-          .status(400)
-          .json({ success: false, message: messages.join(', ') });
-      }
-      console.error('Submit paper error:', err);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: 'Server error during paper submission.',
-        });
+      console.error('[SUBMIT_PAPER_ERROR]', err.message);
+
+      res.status(500).json({
+        success: false,
+        message: 'Server error during paper submission.',
+      });
     }
   }
 );
 
 /**
  * GET /my-papers
- * Author views their own submitted papers with reviews
  */
 router.get(
   '/my-papers',
@@ -88,7 +81,6 @@ router.get(
         .populate('reviewers', 'name email expertise')
         .sort({ submittedAt: -1 });
 
-      // Attach reviews to each paper
       const papersWithReviews = await Promise.all(
         papers.map(async (paper) => {
           const reviews = await Review.find({ paperId: paper._id }).populate(
@@ -101,17 +93,18 @@ router.get(
 
       res.json({ success: true, papers: papersWithReviews });
     } catch (err) {
-      console.error('My papers error:', err);
-      res
-        .status(500)
-        .json({ success: false, message: 'Server error fetching papers.' });
+      console.error('[MY_PAPERS_ERROR]', err.message);
+
+      res.status(500).json({
+        success: false,
+        message: 'Server error fetching papers.',
+      });
     }
   }
 );
 
 /**
  * GET /assigned-papers
- * Reviewer views papers assigned to them
  */
 router.get(
   '/assigned-papers',
@@ -124,33 +117,31 @@ router.get(
         .populate('reviewers', 'name email expertise')
         .sort({ submittedAt: -1 });
 
-      // Attach this reviewer's own review to each paper
       const papersWithMyReview = await Promise.all(
         papers.map(async (paper) => {
           const myReview = await Review.findOne({
             paperId: paper._id,
             reviewerId: req.user._id,
           });
+
           return { ...paper.toObject(), myReview };
         })
       );
 
       res.json({ success: true, papers: papersWithMyReview });
     } catch (err) {
-      console.error('Assigned papers error:', err);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: 'Server error fetching assigned papers.',
-        });
+      console.error('[ASSIGNED_PAPERS_ERROR]', err.message);
+
+      res.status(500).json({
+        success: false,
+        message: 'Server error fetching assigned papers.',
+      });
     }
   }
 );
 
 /**
  * GET /all-papers
- * Admin views all papers with full review data
  */
 router.get(
   '/all-papers',
@@ -175,18 +166,18 @@ router.get(
 
       res.json({ success: true, papers: papersWithReviews });
     } catch (err) {
-      console.error('All papers error:', err);
-      res
-        .status(500)
-        .json({ success: false, message: 'Server error fetching all papers.' });
+      console.error('[ALL_PAPERS_ERROR]', err.message);
+
+      res.status(500).json({
+        success: false,
+        message: 'Server error fetching all papers.',
+      });
     }
   }
 );
 
 /**
  * POST /assign-reviewers
- * Admin automatically assigns 2 reviewers per paper
- * Rules: no duplicates, reviewer != author
  */
 router.post(
   '/assign-reviewers',
@@ -197,46 +188,45 @@ router.post(
       const { paperId } = req.body;
 
       if (!paperId) {
-        return res
-          .status(400)
-          .json({ success: false, message: 'Paper ID is required.' });
-      }
-
-      const paper = await Paper.findById(paperId);
-      if (!paper) {
-        return res
-          .status(404)
-          .json({ success: false, message: 'Paper not found.' });
-      }
-
-      if (paper.reviewers && paper.reviewers.length >= 2) {
         return res.status(400).json({
           success: false,
-          message: 'Reviewers already assigned to this paper.',
+          message: 'Paper ID is required.',
         });
       }
 
-      // Get all reviewers excluding the paper's author
-      const availableReviewers = await User.find({
+      const paper = await Paper.findById(paperId);
+
+      if (!paper) {
+        return res.status(404).json({
+          success: false,
+          message: 'Paper not found.',
+        });
+      }
+
+      if (paper.reviewers?.length >= 2) {
+        return res.status(400).json({
+          success: false,
+          message: 'Reviewers already assigned.',
+        });
+      }
+
+      const reviewers = await User.find({
         role: 'reviewer',
         _id: { $ne: paper.authorId },
       });
 
-      if (availableReviewers.length < 2) {
+      if (reviewers.length < 2) {
         return res.status(400).json({
           success: false,
-          message: 'Not enough reviewers available (need at least 2).',
+          message: 'Not enough reviewers.',
         });
       }
 
-      // Randomly shuffle and pick 2 reviewers
-      const shuffled = availableReviewers.sort(() => Math.random() - 0.5);
-      const selected = shuffled.slice(0, 2);
-      const reviewerIds = selected.map((r) => r._id);
+      const selected = reviewers.sort(() => 0.5 - Math.random()).slice(0, 2);
 
-      // Update paper with reviewers and change status
-      paper.reviewers = reviewerIds;
+      paper.reviewers = selected.map(r => r._id);
       paper.status = 'under_review';
+
       await paper.save();
 
       await paper.populate('reviewers', 'name email expertise');
@@ -244,21 +234,22 @@ router.post(
 
       res.json({
         success: true,
-        message: `Assigned ${selected.map((r) => r.name).join(' and ')} as reviewers.`,
+        message: `Assigned ${selected.map(r => r.name).join(' and ')}`,
         paper,
       });
     } catch (err) {
-      console.error('Assign reviewers error:', err);
-      res
-        .status(500)
-        .json({ success: false, message: 'Server error assigning reviewers.' });
+      console.error('[ASSIGN_ERROR]', err.message);
+
+      res.status(500).json({
+        success: false,
+        message: 'Server error assigning reviewers.',
+      });
     }
   }
 );
 
 /**
  * POST /final-decision
- * Admin gives the final accept/reject decision
  */
 router.post(
   '/final-decision',
@@ -269,36 +260,34 @@ router.post(
       const { paperId, decision, comments } = req.body;
 
       if (!paperId || !decision) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: 'Paper ID and decision are required.',
-          });
+        return res.status(400).json({
+          success: false,
+          message: 'Paper ID and decision required.',
+        });
       }
 
       if (!['accept', 'reject'].includes(decision)) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: 'Decision must be accept or reject.',
-          });
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid decision.',
+        });
       }
 
       const paper = await Paper.findById(paperId);
+
       if (!paper) {
-        return res
-          .status(404)
-          .json({ success: false, message: 'Paper not found.' });
+        return res.status(404).json({
+          success: false,
+          message: 'Paper not found.',
+        });
       }
 
-      // Check that at least one review exists
-      const reviewCount = await Review.countDocuments({ paperId: paper._id });
+      const reviewCount = await Review.countDocuments({ paperId });
+
       if (reviewCount === 0) {
         return res.status(400).json({
           success: false,
-          message: 'Cannot decide on a paper with no reviews yet.',
+          message: 'No reviews yet.',
         });
       }
 
@@ -307,7 +296,9 @@ router.post(
         comments: comments || '',
         decidedAt: new Date(),
       };
+
       paper.status = decision === 'accept' ? 'accepted' : 'rejected';
+
       await paper.save();
 
       await paper.populate('authorId', 'name email');
@@ -315,24 +306,22 @@ router.post(
 
       res.json({
         success: true,
-        message: `Paper has been ${decision}ed.`,
+        message: `Paper ${decision}ed successfully.`,
         paper,
       });
     } catch (err) {
-      console.error('Final decision error:', err);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: 'Server error making final decision.',
-        });
+      console.error('[FINAL_DECISION_ERROR]', err.message);
+
+      res.status(500).json({
+        success: false,
+        message: 'Server error finalizing decision.',
+      });
     }
   }
 );
 
 /**
  * GET /paper/:id
- * Get a single paper with all its reviews
  */
 router.get('/paper/:id', authenticate, async (req, res) => {
   try {
@@ -341,22 +330,26 @@ router.get('/paper/:id', authenticate, async (req, res) => {
       .populate('reviewers', 'name email expertise');
 
     if (!paper) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'Paper not found.' });
+      return res.status(404).json({
+        success: false,
+        message: 'Paper not found.',
+      });
     }
 
-    // Access control: author sees their own, reviewer sees assigned, admin sees all
-    const isAuthor = paper.authorId._id.toString() === req.user._id.toString();
-    const isReviewer = paper.reviewers.some(
+    const isAuthor =
+      paper.authorId?._id?.toString() === req.user._id.toString();
+
+    const isReviewer = paper.reviewers?.some(
       (r) => r._id.toString() === req.user._id.toString()
     );
+
     const isAdmin = req.user.role === 'admin';
 
     if (!isAuthor && !isReviewer && !isAdmin) {
-      return res
-        .status(403)
-        .json({ success: false, message: 'Access denied.' });
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied.',
+      });
     }
 
     const reviews = await Review.find({ paperId: paper._id }).populate(
@@ -364,12 +357,17 @@ router.get('/paper/:id', authenticate, async (req, res) => {
       'name email expertise'
     );
 
-    res.json({ success: true, paper: { ...paper.toObject(), reviews } });
+    res.json({
+      success: true,
+      paper: { ...paper.toObject(), reviews },
+    });
   } catch (err) {
-    console.error('Get paper error:', err);
-    res
-      .status(500)
-      .json({ success: false, message: 'Server error fetching paper.' });
+    console.error('[GET_PAPER_ERROR]', err.message);
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching paper.',
+    });
   }
 });
 
