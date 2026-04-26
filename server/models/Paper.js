@@ -17,9 +17,8 @@ const PaperSchema = new mongoose.Schema({
     maxlength: 3000,
   },
   keywords: {
-    type: String,
-    trim: true,
-    default: '',
+    type: [String],
+    default: [],
   },
   fileUrl: {
     // Path to the uploaded PDF file
