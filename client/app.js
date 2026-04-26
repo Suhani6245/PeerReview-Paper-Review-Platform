@@ -403,3 +403,38 @@ function pdfUrl(fileUrl) {
 
   return fileUrl; // Fallback for other URLs
 }
+
+async function downloadPaper(endpoint, filename) {
+  const token = Auth.getToken();
+  if (!token) {
+    Auth.logout();
+    return;
+  }
+
+  try {
+    const res = await fetch(API_BASE + endpoint, {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer ' + token,
+      },
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      Toast.error('Download failed', data?.message || 'Unable to download PDF.');
+      return;
+    }
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename || 'paper.pdf';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    Toast.error('Download failed', err.message || 'Unable to download PDF.');
+  }
+}

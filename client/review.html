@@ -425,8 +425,12 @@
           formatDate(paper.submittedAt);
 
         /* Load PDF */
-        var downloadLink = '/api/paper/' + paper._id + '/download';
-        document.getElementById('pdf-link').href = downloadLink;
+        var pdfLink = document.getElementById('pdf-link');
+        pdfLink.href = '#';
+        pdfLink.onclick = function () {
+          downloadPaper('/paper/' + paper._id + '/download', paper.fileName || paper.fileUrl.replace(/^.*[\\/]/, ''));
+          return false;
+        };
         document.getElementById('pdf-filename').textContent =
           paper.fileName || paper.fileUrl.replace(/^.*[\\/]/, '');
 
