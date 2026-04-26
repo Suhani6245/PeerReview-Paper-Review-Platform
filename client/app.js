@@ -3,7 +3,7 @@
    No external CSS dependency. Toasts are self-styled.
    ================================================ */
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://peerreview-paper-review-platform.onrender.com/api';
 
 /* ── AUTH ───────────────────────────────────────── */
 const Auth = {
@@ -385,14 +385,10 @@ function initStars(containerId, inputId) {
 }
 
 /* ── PDF DOWNLOAD URL HELPER ───────────────────────────── */
-/*
-  Returns the download URL for a paper PDF.
-  Server route /api/download/:filename forces a Save-As dialog
-  so the browser downloads instead of trying to open the file.
-*/
+
 function pdfUrl(fileUrl) {
   if (!fileUrl) return '#';
   /* Strip any folder path, keep only the filename */
   var filename = fileUrl.replace(/^.*[\\/]/, '');
-  return 'http://localhost:5000/api/download/' + filename;
+  return API_BASE + '/download/' + filename;
 }
