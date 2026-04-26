@@ -20,15 +20,15 @@ app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded PDFs statically  →  GET /uploads/paper-xxx.pdf
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Serve uploaded PDFs
+const uploadsPath = path.join(__dirname, 'uploads');
+app.use('/uploads', express.static(uploadsPath));
 
-// Dedicated DOWNLOAD route  →  GET /api/download/paper-xxx.pdf
-// Forces browser "Save As" dialog instead of opening in tab
+// Download route
 app.get('/api/download/:filename', (req, res) => {
-  // path.basename strips any "../" tricks for security
   const filename = path.basename(req.params.filename);
-  const filePath = path.join(__dirname, '../uploads', filename);
+  const filePath = path.join(__dirname, 'uploads', filename);
+
   res.download(filePath, filename, (err) => {
     if (err && !res.headersSent) {
       res.status(404).json({ success: false, message: 'File not found.' });
@@ -68,14 +68,21 @@ app.use((err, req, res, next) => {
 // ── Database + Start ──────────────────────────────────────────────────────────
 const startServer = async () => {
   try {
-    await mongoose.connect(
-      process.env.MONGO_URI || 'mongodb://localhost:27017/academic_review'
-    );
+    if (!process.env.MONGO_URI) {
+      console.error('❌ MONGO_URI is not defined in environment variables');
+      process.exit(1);
+    }
+
+    await mongoose.connect(process.env.MONGO_URI);
+
     console.log('✅ Connected to MongoDB');
+
     await seedAdmin();
+
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
+
   } catch (err) {
     console.error('❌ Failed to connect to MongoDB:', err.message);
     process.exit(1);
