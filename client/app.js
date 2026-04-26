@@ -438,3 +438,6 @@ async function downloadPaper(endpoint, filename) {
     Toast.error('Download failed', err.message || 'Unable to download PDF.');
   }
 }
+
+// Make function globally accessible
+window.downloadPaper = downloadPaper;
