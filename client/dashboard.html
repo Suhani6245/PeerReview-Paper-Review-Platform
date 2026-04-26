@@ -812,7 +812,7 @@
                   ? p.reviewers.length + ' reviewer(s) assigned'
                   : 'Awaiting assignment') +
                 '</span>' +
-                '<a href="#" onclick="window.downloadPaper(\\\'/paper/\\\' + p._id + \\\'/download\\\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
+                '<a href="#" onclick="window.downloadPaper(\'/paper/' + p._id + '/download\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
                 '</div>' +
                 '</div>'
               );
@@ -870,7 +870,7 @@
                     '</div>'
                   : '') +
                 '<div class="card-foot">' +
-                '<a href="#" onclick="window.downloadPaper(\\\'/paper/\\\' + p._id + \\\'/download\\\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
+                '<a href="#" onclick="window.downloadPaper(\'/paper/' + p._id + '/download\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
                 (!done
                   ? '<button class="btn btn-primary btn-sm" onclick="openRevModal(\'' +
                     p._id +
@@ -999,7 +999,7 @@
                 '/' +
                 (p.reviewers ? p.reviewers.length : 0) +
                 ' reviews</span>' +
-                '<a href="#" onclick="window.downloadPaper(\\\'/paper/\\\' + p._id + \\\'/download\\\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
+                '<a href="#" onclick="window.downloadPaper(\'/paper/' + p._id + '/download\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
                 '</div>' +
                 '</div>'
               );

@@ -2,6 +2,7 @@ const express = require('express');
 const { pipeline } = require('stream');
 const { promisify } = require('util');
 const streamPipeline = promisify(pipeline);
+const axios = require('axios');
 const router = express.Router();
 const Paper = require('../models/Paper');
 const User = require('../models/User');
@@ -388,6 +389,7 @@ router.get('/paper/:id', authenticate, async (req, res) => {
  * Stream Cloudinary PDFs through the API so browser download works reliably.
  */
 router.get('/paper/:id/download', authenticate, async (req, res) => {
+  console.log('[DOWNLOAD_REQUEST]', req.params.id, req.user._id);
   try {
     const paper = await Paper.findById(req.params.id);
 
@@ -411,27 +413,29 @@ router.get('/paper/:id/download', authenticate, async (req, res) => {
 
     const filename = paper.fileName || 'paper.pdf';
     const fileUrl = paper.fileUrl;
+    console.log('[DOWNLOAD_FILE]', filename, fileUrl);
 
     if (fileUrl.startsWith('/uploads/') || fileUrl.startsWith('uploads/')) {
       return res.download(fileUrl, filename);
     }
 
-    const response = await fetch(fileUrl);
-    if (!response.ok) {
+    console.log('[FETCHING_CLOUDINARY]', fileUrl);
+    const response = await axios.get(fileUrl, { responseType: 'stream' });
+    if (response.status !== 200) {
       return res.status(response.status).json({
         success: false,
         message: 'Cloudinary file download failed.',
       });
     }
 
-    const contentType = response.headers.get('content-type') || 'application/pdf';
+    const contentType = response.headers['content-type'] || 'application/pdf';
     res.setHeader('Content-Type', contentType);
     res.setHeader(
       'Content-Disposition',
       `attachment; filename="${filename.replace(/"/g, '')}"`
     );
 
-    await streamPipeline(response.body, res);
+    response.data.pipe(res);
   } catch (err) {
     console.error('[DOWNLOAD_PAPER_ERROR]', err.message);
     if (!res.headersSent) {

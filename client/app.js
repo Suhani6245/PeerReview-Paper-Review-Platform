@@ -3,7 +3,9 @@
    No external CSS dependency. Toasts are self-styled.
    ================================================ */
 
-const API_BASE = 'https://peerreview-paper-review-platform.onrender.com/api';
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:5000/api'
+  : 'https://peerreview-paper-review-platform.onrender.com/api';
 
 /* ── AUTH ───────────────────────────────────────── */
 const Auth = {
@@ -405,13 +407,16 @@ function pdfUrl(fileUrl) {
 }
 
 async function downloadPaper(endpoint, filename) {
+  console.log('Download function called with:', endpoint, filename);
   const token = Auth.getToken();
   if (!token) {
+    console.log('No token found');
     Auth.logout();
     return;
   }
 
   try {
+    console.log('Making request to:', API_BASE + endpoint);
     const res = await fetch(API_BASE + endpoint, {
       method: 'GET',
       headers: {
@@ -419,13 +424,16 @@ async function downloadPaper(endpoint, filename) {
       },
     });
 
+    console.log('Response status:', res.status, 'headers:', Object.fromEntries(res.headers.entries()));
     if (!res.ok) {
       const data = await res.json().catch(() => null);
+      console.error('Download failed:', data);
       Toast.error('Download failed', data?.message || 'Unable to download PDF.');
       return;
     }
 
     const blob = await res.blob();
+    console.log('Blob received, size:', blob.size);
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -434,7 +442,9 @@ async function downloadPaper(endpoint, filename) {
     link.click();
     link.remove();
     window.URL.revokeObjectURL(url);
+    console.log('Download initiated');
   } catch (err) {
+    console.error('Download error:', err);
     Toast.error('Download failed', err.message || 'Unable to download PDF.');
   }
 }
