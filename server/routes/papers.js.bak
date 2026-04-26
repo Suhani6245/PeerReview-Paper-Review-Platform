@@ -1,5 +1,8 @@
 const express = require('express');
 const path = require('path');
+const { pipeline } = require('stream');
+const { promisify } = require('util');
+const streamPipeline = promisify(pipeline);
 const axios = require('axios');
 const router = express.Router();
 const Paper = require('../models/Paper');
@@ -47,10 +50,15 @@ router.post(
       const paper = await Paper.create({
         title,
         abstract,
+
+        // ✅ FIXED (was broken before)
         keywords: keywordArray,
+
+        // Cloudinary upload data
         fileUrl: req.file.path,
         publicId: req.file.filename,
         fileName: req.file.originalname,
+
         authorId: req.user._id,
         status: 'pending',
       });
@@ -64,6 +72,7 @@ router.post(
       });
     } catch (err) {
       console.error('[SUBMIT_PAPER_ERROR]', err.message);
+
       res.status(500).json({
         success: false,
         message: 'Server error during paper submission.',
@@ -99,6 +108,7 @@ router.get(
       res.json({ success: true, papers: papersWithReviews });
     } catch (err) {
       console.error('[MY_PAPERS_ERROR]', err.message);
+
       res.status(500).json({
         success: false,
         message: 'Server error fetching papers.',
@@ -135,6 +145,7 @@ router.get(
       res.json({ success: true, papers: papersWithMyReview });
     } catch (err) {
       console.error('[ASSIGNED_PAPERS_ERROR]', err.message);
+
       res.status(500).json({
         success: false,
         message: 'Server error fetching assigned papers.',
@@ -170,6 +181,7 @@ router.get(
       res.json({ success: true, papers: papersWithReviews });
     } catch (err) {
       console.error('[ALL_PAPERS_ERROR]', err.message);
+
       res.status(500).json({
         success: false,
         message: 'Server error fetching all papers.',
@@ -241,6 +253,7 @@ router.post(
       });
     } catch (err) {
       console.error('[ASSIGN_ERROR]', err.message);
+
       res.status(500).json({
         success: false,
         message: 'Server error assigning reviewers.',
@@ -312,6 +325,7 @@ router.post(
       });
     } catch (err) {
       console.error('[FINAL_DECISION_ERROR]', err.message);
+
       res.status(500).json({
         success: false,
         message: 'Server error finalizing decision.',
@@ -336,10 +350,13 @@ router.get('/paper/:id', authenticate, async (req, res) => {
       });
     }
 
-    const isAuthor = paper.authorId?._id?.toString() === req.user._id.toString();
+    const isAuthor =
+      paper.authorId?._id?.toString() === req.user._id.toString();
+
     const isReviewer = paper.reviewers?.some(
       (r) => r._id.toString() === req.user._id.toString()
     );
+
     const isAdmin = req.user.role === 'admin';
 
     if (!isAuthor && !isReviewer && !isAdmin) {
@@ -360,6 +377,7 @@ router.get('/paper/:id', authenticate, async (req, res) => {
     });
   } catch (err) {
     console.error('[GET_PAPER_ERROR]', err.message);
+
     res.status(500).json({
       success: false,
       message: 'Server error fetching paper.',
@@ -369,9 +387,10 @@ router.get('/paper/:id', authenticate, async (req, res) => {
 
 /**
  * GET /paper/:id/download
- * Handle PDF downloads from Cloudinary or local storage
+ * Stream Cloudinary PDFs through the API so browser download works reliably.
  */
 router.get('/paper/:id/download', authenticate, async (req, res) => {
+  console.log('[DOWNLOAD_REQUEST]', req.params.id, req.user._id);
   try {
     const paper = await Paper.findById(req.params.id);
 
@@ -395,58 +414,63 @@ router.get('/paper/:id/download', authenticate, async (req, res) => {
 
     const filename = paper.fileName || 'paper.pdf';
     const fileUrl = paper.fileUrl;
-    console.log('[DOWNLOAD_REQUEST]', { id: req.params.id, fileUrl, filename });
+    console.log('[DOWNLOAD_FILE]', filename, fileUrl);
 
-    // ✅ Cloudinary URL - valid Cloudinary resource
-    if (fileUrl.startsWith('https://res.cloudinary.com/')) {
-      console.log('[CLOUDINARY_DOWNLOAD]', fileUrl);
-      try {
-        const response = await axios.get(fileUrl, { responseType: 'stream' });
-        res.set('Content-Type', 'application/pdf');
-        res.set('Content-Disposition', `attachment; filename="${filename}"`);
-        response.data.pipe(res);
-      } catch (err) {
-        console.error('[CLOUDINARY_STREAM_ERROR]', err.message);
-        if (!res.headersSent) {
-          res.status(502).json({
-            success: false,
-            message: 'Failed to stream from Cloudinary.',
-          });
-        }
-      }
-    }
-    // ✅ Local file path - legacy uploads from previous system
-    else if (fileUrl.startsWith('/uploads/') || fileUrl.startsWith('uploads/')) {
-      console.log('[LOCAL_DOWNLOAD]', fileUrl);
+    if (fileUrl.startsWith('/uploads/') || fileUrl.startsWith('uploads/')) {
       const normalizedPath = fileUrl.replace(/^\/+/, '');
       const localFilePath = path.join(__dirname, '..', normalizedPath);
-      res.download(localFilePath, filename, (err) => {
-        if (err) {
-          console.error('[LOCAL_FILE_ERROR]', err.message);
-          if (!res.headersSent) {
-            res.status(404).json({
-              success: false,
-              message: 'File not found on server.',
-            });
-          }
+
+      return res.download(localFilePath, filename, (err) => {
+        if (err && !res.headersSent) {
+          console.error('[DOWNLOAD_LOCAL_ERROR]', err);
+          return res.status(404).json({
+            success: false,
+            message: 'Local PDF file not found.',
+          });
         }
       });
     }
-    // ❌ Invalid URL format - database corruption or missing upload
-    else {
-      console.error('[INVALID_URL_FORMAT]', fileUrl);
-      res.status(400).json({
+
+    console.log('[FETCHING_CLOUDINARY]', fileUrl);
+    let response;
+    try {
+      response = await axios.get(fileUrl, {
+        responseType: 'stream',
+        validateStatus: null,
+      });
+    } catch (fetchErr) {
+      console.error('[DOWNLOAD_FETCH_ERROR]', fetchErr.stack || fetchErr);
+      if (!res.headersSent) {
+        return res.status(502).json({
+          success: false,
+          message: 'Failed to fetch PDF from storage.',
+          detail: fetchErr.message,
+        });
+      }
+    }
+
+    if (!response || response.status !== 200) {
+      return res.status(response?.status || 502).json({
         success: false,
-        message: 'Invalid file URL format in database.',
-        fileUrl,
+        message: 'Cloudinary file download failed.',
+        detail: response ? `${response.status} ${response.statusText}` : 'No response',
       });
     }
+
+    const contentType = response.headers['content-type'] || 'application/pdf';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${filename.replace(/"/g, '')}"`
+    );
+
+    await streamPipeline(response.data, res);
   } catch (err) {
-    console.error('[DOWNLOAD_ERROR]', err);
+    console.error('[DOWNLOAD_PAPER_ERROR]', err.stack || err);
     if (!res.headersSent) {
       res.status(500).json({
         success: false,
-        message: 'Download failed.',
+        message: err.message || 'Download failed.',
       });
     }
   }
