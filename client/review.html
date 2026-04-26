@@ -425,7 +425,7 @@
           formatDate(paper.submittedAt);
 
         /* Load PDF */
-        var downloadLink = pdfUrl(paper.fileUrl);
+        var downloadLink = '/api/paper/' + paper._id + '/download';
         document.getElementById('pdf-link').href = downloadLink;
         document.getElementById('pdf-filename').textContent =
           paper.fileName || paper.fileUrl.replace(/^.*[\\/]/, '');

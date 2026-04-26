@@ -1,4 +1,7 @@
 const express = require('express');
+const { pipeline } = require('stream');
+const { promisify } = require('util');
+const streamPipeline = promisify(pipeline);
 const router = express.Router();
 const Paper = require('../models/Paper');
 const User = require('../models/User');
@@ -377,6 +380,63 @@ router.get('/paper/:id', authenticate, async (req, res) => {
       success: false,
       message: 'Server error fetching paper.',
     });
+  }
+});
+
+/**
+ * GET /paper/:id/download
+ * Stream Cloudinary PDFs through the API so browser download works reliably.
+ */
+router.get('/paper/:id/download', authenticate, async (req, res) => {
+  try {
+    const paper = await Paper.findById(req.params.id);
+
+    if (!paper) {
+      return res.status(404).json({ success: false, message: 'Paper not found.' });
+    }
+
+    const isAuthor = paper.authorId?.toString() === req.user._id.toString();
+    const isReviewer = paper.reviewers?.some(
+      (reviewerId) => reviewerId.toString() === req.user._id.toString()
+    );
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isAuthor && !isReviewer && !isAdmin) {
+      return res.status(403).json({ success: false, message: 'Access denied.' });
+    }
+
+    if (!paper.fileUrl) {
+      return res.status(404).json({ success: false, message: 'PDF not available.' });
+    }
+
+    const filename = paper.fileName || 'paper.pdf';
+    const fileUrl = paper.fileUrl;
+
+    if (fileUrl.startsWith('/uploads/') || fileUrl.startsWith('uploads/')) {
+      return res.download(fileUrl, filename);
+    }
+
+    const response = await fetch(fileUrl);
+    if (!response.ok) {
+      return res.status(response.status).json({
+        success: false,
+        message: 'Cloudinary file download failed.',
+      });
+    }
+
+    const contentType = response.headers.get('content-type') || 'application/pdf';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${filename.replace(/"/g, '')}"`
+    );
+
+    await streamPipeline(response.body, res);
+  } catch (err) {
+    console.error('[DOWNLOAD_PAPER_ERROR]', err.message);
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, message: 'Download failed.' });
+    }
   }
 });
 
