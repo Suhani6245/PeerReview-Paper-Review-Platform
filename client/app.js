@@ -388,7 +388,5 @@ function initStars(containerId, inputId) {
 
 function pdfUrl(fileUrl) {
   if (!fileUrl) return '#';
-  /* Strip any folder path, keep only the filename */
-  var filename = fileUrl.replace(/^.*[\\/]/, '');
-  return API_BASE + '/download/' + filename;
+  return API_BASE + '/download/' + encodeURIComponent(fileUrl);
 }
