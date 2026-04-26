@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Submit Paper — PeerReview</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        background: #f4f6f9;
+        color: #0d1b2a;
+      }
+
+      /* ── Page layout ── */
+      .wrap {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+      .page {
+        padding: 36px 0 80px;
+      }
+
+      /* Page header row */
+      .ph {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .ph h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0d1b2a;
+      }
+      .ph p {
+        font-size: 0.875rem;
+        color: #7a8899;
+        margin-top: 4px;
+      }
+
+      /* Back button */
+      .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: #fff;
+        color: #0d1b2a;
+        border: 1.5px solid #dde3ea;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: border-color 0.15s;
+      }
+      .btn-back:hover {
+        border-color: #0d1b2a;
+      }
+
+      /* Progress bar */
+      .prog-bar {
+        height: 4px;
+        background: #dde3ea;
+        border-radius: 4px;
+        margin-bottom: 22px;
+        overflow: hidden;
+      }
+      .prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #0d1b2a, #c9a84c);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+
+      /* Two-column layout */
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr 270px;
+        gap: 24px;
+        align-items: start;
+      }
+
+      /* White card */
+      .card {
+        background: #fff;
+        border: 1px solid #dde3ea;
+        border-radius: 14px;
+        padding: 26px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      /* Form fields */
+      .field {
+        margin-bottom: 18px;
+      }
+      .field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #3a4a5c;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .field input,
+      .field textarea {
+        width: 100%;
+        padding: 10px 14px;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 0.9rem;
+        color: #0d1b2a;
+        background: #fff;
+        border: 1.5px solid #dde3ea;
+        border-radius: 8px;
+        outline: none;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+      }
+      .field input:focus,
+      .field textarea:focus {
+        border-color: #0d1b2a;
+        box-shadow: 0 0 0 3px rgba(13, 27, 42, 0.08);
+      }
+      .field input::placeholder,
+      .field textarea::placeholder {
+        color: #c0c8d0;
+      }
+      textarea {
+        resize: vertical;
+        min-height: 120px;
+        line-height: 1.6;
+      }
+      .char-count {
+        font-size: 0.74rem;
+        color: #7a8899;
+        text-align: right;
+        margin-top: 3px;
+        font-family: 'Consolas', monospace;
+      }
+      .hint {
+        font-size: 0.76rem;
+        color: #7a8899;
+        margin-top: 4px;
+      }
+
+      /* File drop zone */
+      .drop-zone {
+        border: 2px dashed #dde3ea;
+        border-radius: 10px;
+        padding: 28px 20px;
+        text-align: center;
+        cursor: pointer;
+        background: #fafbfc;
+        transition: all 0.15s;
+      }
+      .drop-zone:hover,
+      .drop-zone.over {
+        border-color: #0d1b2a;
+        background: #f0f4ff;
+      }
+      .drop-zone input {
+        display: none;
+      }
+      .drop-icon {
+        font-size: 2rem;
+        margin-bottom: 8px;
+      }
+      .drop-text {
+        font-size: 0.9rem;
+        color: #3a4a5c;
+      }
+      .drop-text strong {
+        color: #0d1b2a;
+      }
+      .drop-hint {
+        font-size: 0.76rem;
+        color: #7a8899;
+        margin-top: 4px;
+      }
+      .chosen-file {
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 0.8rem;
+        font-family: 'Consolas', monospace;
+        background: #eef0f3;
+        padding: 4px 12px;
+        border-radius: 20px;
+        color: #0d1b2a;
+      }
+
+      /* Buttons row */
+      .btn-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 6px;
+      }
+      .btn-submit {
+        padding: 10px 22px;
+        background: #c9a84c;
+        color: #0d1b2a;
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .btn-submit:hover {
+        background: #e2c47a;
+      }
+      .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .btn-cancel {
+        padding: 10px 22px;
+        background: #fff;
+        color: #0d1b2a;
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border: 1.5px solid #dde3ea;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: border-color 0.15s;
+      }
+      .btn-cancel:hover {
+        border-color: #0d1b2a;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        position: sticky;
+        top: 72px;
+      }
+      .sidebar-card {
+        background: #fff;
+        border: 1px solid #dde3ea;
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 14px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+      .sidebar-card h4 {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #0d1b2a;
+        margin-bottom: 10px;
+      }
+      .guide-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+      .guide-list li {
+        font-size: 0.8rem;
+        color: #3a4a5c;
+        display: flex;
+        gap: 8px;
+        line-height: 1.4;
+      }
+      .guide-list li::before {
+        content: '→';
+        color: #c9a84c;
+        flex-shrink: 0;
+      }
+      .step {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 12px;
+      }
+      .step-num {
+        width: 22px;
+        height: 22px;
+        background: #0d1b2a;
+        color: #c9a84c;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .step-text {
+        font-size: 0.8rem;
+        color: #3a4a5c;
+        line-height: 1.4;
+      }
+      .step-text strong {
+        display: block;
+        color: #0d1b2a;
+        font-weight: 600;
+        font-size: 0.82rem;
+      }
+
+      @media (max-width: 800px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          position: static;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav id="navbar"></nav>
+
+    <div class="wrap">
+      <div class="page">
+        <div class="ph">
+          <div>
+            <h1>Submit Paper</h1>
+            <p>Fill in your paper details and upload the PDF.</p>
+          </div>
+          <a href="dashboard.html" class="btn-back">← Back</a>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="prog-bar">
+          <div class="prog-fill" id="prog" style="width: 0%"></div>
+        </div>
+
+        <div class="layout">
+          <!-- Form card -->
+          <div class="card">
+            <form id="frm" novalidate>
+              <div class="field">
+                <label for="title">Paper Title *</label>
+                <input
+                  type="text"
+                  id="title"
+                  placeholder="e.g. Transformer Models for Low-Resource NLP"
+                  maxlength="300"
+                />
+                <div class="char-count"><span id="tc">0</span> / 300</div>
+              </div>
+
+              <div class="field">
+                <label for="abstract">Abstract *</label>
+                <textarea
+                  id="abstract"
+                  rows="7"
+                  placeholder="Write a summary of your research (min 50 characters)..."
+                  maxlength="3000"
+                ></textarea>
+                <div class="char-count"><span id="ac">0</span> / 3000</div>
+              </div>
+
+              <div class="field">
+                <label for="keywords">Keywords</label>
+                <input
+                  type="text"
+                  id="keywords"
+                  placeholder="e.g. machine learning, NLP, transformers"
+                />
+                <span class="hint"
+                  >Separate with commas. Helps match your paper to
+                  reviewers.</span
+                >
+              </div>
+
+              <div class="field">
+                <label>PDF File *</label>
+                <div
+                  class="drop-zone"
+                  id="drop"
+                  onclick="document.getElementById('pdf').click()"
+                >
+                  <input type="file" id="pdf" accept=".pdf" />
+                  <div class="drop-icon">📄</div>
+                  <div class="drop-text">
+                    <strong>Click to choose file</strong> or drag & drop
+                  </div>
+                  <div class="drop-hint">PDF only · Max 10 MB</div>
+                  <div
+                    class="chosen-file"
+                    id="fname"
+                    style="display: none"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="btn-row">
+                <button type="submit" class="btn-submit" id="sub-btn">
+                  📤 Submit for Review
+                </button>
+                <a href="dashboard.html" class="btn-cancel">Cancel</a>
+              </div>
+            </form>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="sidebar">
+            <div class="sidebar-card">
+              <h4>📋 Submission Guidelines</h4>
+              <ul class="guide-list">
+                <li>PDF format only (max 10 MB)</li>
+                <li>Abstract must be 50–3000 characters</li>
+                <li>Remove your name from PDF (blind review)</li>
+                <li>Original, unpublished work only</li>
+              </ul>
+            </div>
+            <div class="sidebar-card">
+              <h4>🔄 What Happens Next</h4>
+              <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-text">
+                  <strong>Submitted</strong>Enters queue as "Pending"
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-text">
+                  <strong>Reviewers assigned</strong>Admin auto-assigns 2
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-text">
+                  <strong>Peer review</strong>Reviewers rate & comment
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-text">
+                  <strong>Final decision</strong>Accept or Reject with feedback
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+      var user = Auth.requireAuth('author');
+      if (!user) throw new Error();
+      buildNavbar('submit');
+
+      var pdfInput = document.getElementById('pdf');
+      var drop = document.getElementById('drop');
+      var fname = document.getElementById('fname');
+
+      /* Character counters */
+      document.getElementById('title').addEventListener('input', function () {
+        document.getElementById('tc').textContent = this.value.length;
+        updateProg();
+      });
+      document
+        .getElementById('abstract')
+        .addEventListener('input', function () {
+          document.getElementById('ac').textContent = this.value.length;
+          updateProg();
+        });
+
+      /* Progress */
+      function updateProg() {
+        var t = document.getElementById('title').value.trim().length >= 5;
+        var a = document.getElementById('abstract').value.trim().length >= 50;
+        var f = !!pdfInput.files[0];
+        document.getElementById('prog').style.width =
+          (((t ? 1 : 0) + (a ? 1 : 0) + (f ? 1 : 0)) / 3) * 100 + '%';
+      }
+
+      /* Show chosen file name */
+      function showFile(file) {
+        fname.textContent =
+          '📎 ' +
+          file.name +
+          ' (' +
+          (file.size / 1024 / 1024).toFixed(2) +
+          ' MB)';
+        fname.style.display = 'inline-block';
+        updateProg();
+      }
+
+      pdfInput.addEventListener('change', function () {
+        if (pdfInput.files[0]) showFile(pdfInput.files[0]);
+      });
+
+      drop.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        drop.classList.add('over');
+      });
+      drop.addEventListener('dragleave', function () {
+        drop.classList.remove('over');
+      });
+      drop.addEventListener('drop', function (e) {
+        e.preventDefault();
+        drop.classList.remove('over');
+        var file = e.dataTransfer.files[0];
+        if (!file) return;
+        if (file.type !== 'application/pdf') {
+          Toast.error('Wrong type', 'Please drop a PDF file.');
+          return;
+        }
+        var dt = new DataTransfer();
+        dt.items.add(file);
+        pdfInput.files = dt.files;
+        showFile(file);
+      });
+
+      document
+        .getElementById('frm')
+        .addEventListener('submit', async function (e) {
+          e.preventDefault();
+          var title = document.getElementById('title').value.trim();
+          var abstract = document.getElementById('abstract').value.trim();
+          var keywords = document.getElementById('keywords').value.trim();
+          var file = pdfInput.files[0];
+          var btn = document.getElementById('sub-btn');
+
+          if (title.length < 5) {
+            Toast.warning('Title too short', 'Enter at least 5 characters.');
+            return;
+          }
+          if (abstract.length < 50) {
+            Toast.warning(
+              'Abstract too short',
+              'Enter at least 50 characters.'
+            );
+            return;
+          }
+          if (!file) {
+            Toast.warning('No file', 'Please upload a PDF.');
+            return;
+          }
+          if (file.size > 10 * 1024 * 1024) {
+            Toast.error('File too large', 'Max size is 10 MB.');
+            return;
+          }
+
+          setLoading(btn, true);
+          var fd = new FormData();
+          fd.append('title', title);
+          fd.append('abstract', abstract);
+          fd.append('keywords', keywords);
+          fd.append('pdf', file);
+          var res = await Api.postForm('/submit-paper', fd);
+          setLoading(btn, false);
+
+          if (res && res.ok) {
+            Toast.success('Submitted!', 'Paper is now in the review queue.');
+            setTimeout(function () {
+              window.location.href = 'dashboard.html';
+            }, 800);
+          } else {
+            Toast.error(
+              'Failed',
+              res && res.data ? res.data.message : 'Something went wrong.'
+            );
+          }
+        });
+    </script>
+  </body>
+</html>

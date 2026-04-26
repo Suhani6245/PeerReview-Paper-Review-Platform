@@ -1,0 +1,79 @@
+# Environment variables
+
+.env
+.env.*
+!.env.example
+node_modules/.env
+
+# Node modules (both root and server/client)
+
+node_modules/
+**/node_modules/
+
+# Uploads (user files like PDFs)
+
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build / dist folders
+
+dist/
+build/
+out/
+
+# OS files
+
+.DS_Store
+Thumbs.db
+
+# IDE / Editor settings
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Prettier cache
+
+.prettier-cache/
+.cache/prettier/
+
+# Coverage reports
+
+coverage/
+
+# Secrets / keys
+
+*.pem
+*.key
+*.cert
+
+# Database files
+
+*.db
+*.sqlite
+*.sqlite3
+mongodb/
+data/
+
+# Process managers & PM2
+
+.pm2/
+
+# Temporary files
+
+*.tmp
+*.temp
+*~
+
+# Misc
+
+*.cache

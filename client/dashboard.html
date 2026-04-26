@@ -1,0 +1,1235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — PeerReview</title>
+    <style>
+      /* ── Base ── */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        background: #f4f6f9;
+        color: #0d1b2a;
+      }
+      a {
+        color: #0d1b2a;
+        text-decoration: none;
+      }
+
+      .wrap {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+      .page {
+        padding: 36px 0 80px;
+      }
+
+      /* Page header */
+      .ph {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+      }
+      .ph h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+      .ph p {
+        font-size: 0.875rem;
+        color: #7a8899;
+        margin-top: 4px;
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 18px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-radius: 8px;
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .btn-gold {
+        background: #c9a84c;
+        color: #0d1b2a;
+        border-color: #c9a84c;
+      }
+      .btn-gold:hover {
+        background: #e2c47a;
+      }
+      .btn-outline {
+        background: #fff;
+        color: #0d1b2a;
+        border-color: #dde3ea;
+      }
+      .btn-outline:hover {
+        border-color: #0d1b2a;
+      }
+      .btn-primary {
+        background: #0d1b2a;
+        color: #fff;
+        border-color: #0d1b2a;
+      }
+      .btn-primary:hover {
+        background: #1a2e44;
+      }
+      .btn-success {
+        background: #1e6b45;
+        color: #fff;
+        border-color: #1e6b45;
+      }
+      .btn-success:hover {
+        opacity: 0.88;
+      }
+      .btn-danger {
+        background: #fff;
+        color: #c0392b;
+        border-color: rgba(192, 57, 43, 0.3);
+      }
+      .btn-danger:hover {
+        background: #fdf2f0;
+      }
+      .btn-sm {
+        padding: 5px 13px;
+        font-size: 0.8rem;
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* Stats grid */
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 14px;
+        margin-bottom: 28px;
+      }
+      .stat-card {
+        background: #fff;
+        border: 1px solid #dde3ea;
+        border-top: 3px solid #c9a84c;
+        border-radius: 14px;
+        padding: 16px 14px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+      .stat-num {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0d1b2a;
+        line-height: 1;
+      }
+      .stat-lbl {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #7a8899;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-top: 4px;
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex;
+        gap: 2px;
+        border-bottom: 2px solid #dde3ea;
+        margin-bottom: 22px;
+      }
+      .tab {
+        background: none;
+        border: none;
+        padding: 8px 18px;
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #7a8899;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+        transition: all 0.15s;
+      }
+      .tab:hover {
+        color: #0d1b2a;
+      }
+      .tab.on {
+        color: #0d1b2a;
+        border-bottom-color: #c9a84c;
+      }
+      .panel {
+        display: none;
+      }
+      .panel.on {
+        display: block;
+      }
+
+      /* Papers grid */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 18px;
+      }
+
+      /* Paper card */
+      .card {
+        background: #fff;
+        border: 1px solid #dde3ea;
+        border-radius: 14px;
+        padding: 22px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.15s;
+      }
+      .card:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      }
+      .card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0d1b2a;
+        line-height: 1.4;
+        margin-bottom: 3px;
+      }
+      .card-meta {
+        font-size: 0.78rem;
+        color: #7a8899;
+        margin-bottom: 10px;
+      }
+      .card-abstract {
+        font-size: 0.875rem;
+        color: #3a4a5c;
+        line-height: 1.65;
+        margin-bottom: 14px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .card-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding-top: 12px;
+        border-top: 1px solid #dde3ea;
+        flex-wrap: wrap;
+      }
+
+      /* Review card (inside paper) */
+      .rev-card {
+        background: #f8f9fb;
+        border: 1px solid #dde3ea;
+        border-radius: 8px;
+        padding: 14px;
+        margin-bottom: 8px;
+      }
+      .rev-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .rev-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #0d1b2a;
+      }
+      .rev-body {
+        font-size: 0.85rem;
+        color: #3a4a5c;
+        line-height: 1.6;
+        margin: 6px 0;
+      }
+
+      /* Section label */
+      .sec-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #7a8899;
+        margin: 14px 0 8px;
+      }
+
+      /* Decision box */
+      .dec-box {
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-top: 12px;
+      }
+      .dec-ok {
+        background: #edfaf3;
+        border: 1.5px solid #a7d9bc;
+      }
+      .dec-no {
+        background: #fdf2f0;
+        border: 1.5px solid #f1b9b1;
+      }
+      .dec-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 3px;
+      }
+
+      /* Admin decision form */
+      .dec-form {
+        background: #f8f9fb;
+        border: 1px solid #dde3ea;
+        border-radius: 8px;
+        padding: 14px;
+        margin-top: 12px;
+      }
+      .dec-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #7a8899;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 8px;
+      }
+      .dec-input {
+        width: 100%;
+        padding: 8px 12px;
+        font-family: inherit;
+        font-size: 0.85rem;
+        border: 1.5px solid #dde3ea;
+        border-radius: 8px;
+        outline: none;
+        resize: vertical;
+        min-height: 60px;
+      }
+      .dec-input:focus {
+        border-color: #0d1b2a;
+      }
+      .dec-btns {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      /* Reviewer chips */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+      }
+      .chip {
+        font-size: 0.76rem;
+        background: #f0f0f0;
+        border: 1px solid #dde3ea;
+        border-radius: 20px;
+        padding: 3px 10px;
+        color: #3a4a5c;
+      }
+
+      /* Reviewer list cards */
+      .user-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 14px;
+      }
+      .user-card {
+        background: #fff;
+        border: 1px solid #dde3ea;
+        border-radius: 14px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .avatar {
+        width: 40px;
+        height: 40px;
+        background: #0d1b2a;
+        color: #c9a84c;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      /* Empty state */
+      .empty {
+        text-align: center;
+        padding: 56px 20px;
+        color: #7a8899;
+      }
+      .empty-icon {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        opacity: 0.4;
+      }
+      .empty-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #3a4a5c;
+        margin-bottom: 5px;
+      }
+
+      /* Spinner */
+      .spinner {
+        width: 30px;
+        height: 30px;
+        border: 3px solid #dde3ea;
+        border-top-color: #0d1b2a;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 48px auto;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ── MODALS ── */
+      .modal-bg {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 200;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .modal-box {
+        background: #fff;
+        border-radius: 14px;
+        max-width: 520px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+      }
+      .modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 22px 14px;
+        border-bottom: 1px solid #dde3ea;
+      }
+      .modal-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #0d1b2a;
+      }
+      .modal-x {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        color: #7a8899;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .modal-x:hover {
+        background: #f4f6f9;
+      }
+      .modal-body {
+        padding: 18px 22px;
+      }
+      .modal-foot {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        padding: 0 22px 18px;
+      }
+
+      /* Form inside modals */
+      .m-label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #3a4a5c;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .m-field {
+        margin-bottom: 16px;
+      }
+      .m-input,
+      .m-textarea,
+      .m-select {
+        width: 100%;
+        padding: 10px 14px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        color: #0d1b2a;
+        background: #fff;
+        border: 1.5px solid #dde3ea;
+        border-radius: 8px;
+        outline: none;
+        transition: border-color 0.15s;
+        appearance: none;
+      }
+      .m-input:focus,
+      .m-textarea:focus,
+      .m-select:focus {
+        border-color: #0d1b2a;
+        box-shadow: 0 0 0 3px rgba(13, 27, 42, 0.08);
+      }
+      .m-textarea {
+        resize: vertical;
+        min-height: 110px;
+        line-height: 1.6;
+      }
+      .m-hint {
+        font-size: 0.76rem;
+        color: #7a8899;
+        margin-top: 4px;
+      }
+
+      /* Confirm modal specifics */
+      .confirm-icon {
+        text-align: center;
+        font-size: 2.8rem;
+        margin-bottom: 14px;
+      }
+      .confirm-msg {
+        text-align: center;
+        font-size: 0.95rem;
+        color: #3a4a5c;
+        line-height: 1.6;
+        margin-bottom: 6px;
+      }
+      .confirm-sub {
+        text-align: center;
+        font-size: 0.82rem;
+        color: #7a8899;
+        font-style: italic;
+        margin-bottom: 14px;
+      }
+      .confirm-note {
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 0.82rem;
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+      }
+      .note-ok {
+        background: #edfaf3;
+        border: 1px solid #a7d9bc;
+        color: #1e6b45;
+      }
+      .note-err {
+        background: #fdf2f0;
+        border: 1px solid #f1b9b1;
+        color: #c0392b;
+      }
+
+      .gone {
+        display: none !important;
+      }
+      @media (max-width: 700px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav id="navbar"></nav>
+
+    <div class="wrap">
+      <div class="page">
+        <div class="ph">
+          <div>
+            <h1 id="p-title">Loading...</h1>
+            <p id="p-sub"></p>
+          </div>
+          <div id="p-action"></div>
+        </div>
+
+        <div id="stats-row" class="gone"></div>
+
+        <div id="tab-bar" class="gone">
+          <div class="tabs">
+            <button
+              class="tab on"
+              data-t="papers"
+              onclick="switchTab('papers')"
+            >
+              Papers
+            </button>
+            <button class="tab" data-t="reviews" onclick="switchTab('reviews')">
+              Reviews
+            </button>
+            <button class="tab" data-t="users" onclick="switchTab('users')">
+              Reviewers
+            </button>
+          </div>
+        </div>
+
+        <div id="panel-papers"><div class="spinner"></div></div>
+        <div id="panel-reviews" class="gone"></div>
+        <div id="panel-users" class="gone"></div>
+      </div>
+    </div>
+
+    <!-- ── REVIEW MODAL (reviewer writes a review) ── -->
+    <div class="modal-bg" id="rev-modal" data-modal="overlay">
+      <div class="modal-box">
+        <div class="modal-head">
+          <span class="modal-title">Submit Review</span>
+          <button class="modal-x" onclick="closeModal('rev-modal')">×</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="rev-pid" />
+          <p
+            id="rev-ptitle"
+            style="
+              font-size: 0.9rem;
+              color: #3a4a5c;
+              margin-bottom: 18px;
+              font-style: italic;
+            "
+          ></p>
+          <div class="m-field">
+            <label class="m-label">Rating</label>
+            <div id="rev-stars" style="display: flex; gap: 4px"></div>
+            <input type="hidden" id="rev-rating" value="0" />
+            <span class="m-hint">Click a star (1 = poor, 5 = excellent)</span>
+          </div>
+          <div class="m-field">
+            <label class="m-label" for="rev-comment">Comments *</label>
+            <textarea
+              class="m-textarea"
+              id="rev-comment"
+              rows="5"
+              placeholder="Detailed feedback on methodology, originality, clarity..."
+            ></textarea>
+          </div>
+          <div class="m-field">
+            <label class="m-label" for="rev-rec">Recommendation *</label>
+            <select class="m-select" id="rev-rec">
+              <option value="">— Select —</option>
+              <option value="accept">Accept</option>
+              <option value="major_revision">Major Revision Required</option>
+              <option value="minor_revision">Minor Revision Required</option>
+              <option value="reject">Reject</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button
+            class="btn btn-outline btn-sm"
+            onclick="closeModal('rev-modal')"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary btn-sm"
+            id="rev-sub-btn"
+            onclick="submitReview()"
+          >
+            Submit Review
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CONFIRM MODAL (admin accept / reject) ── -->
+    <div class="modal-bg" id="conf-modal" data-modal="overlay">
+      <div class="modal-box" style="max-width: 420px">
+        <div class="modal-head">
+          <span class="modal-title" id="conf-title">Confirm Decision</span>
+          <button class="modal-x" onclick="closeModal('conf-modal')">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="confirm-icon" id="conf-icon"></div>
+          <p class="confirm-msg" id="conf-msg"></p>
+          <p class="confirm-sub" id="conf-sub"></p>
+          <div class="confirm-note note-ok gone" id="conf-note-ok">
+            <span>✓</span
+            ><span
+              >This is permanent. The author will be notified of the
+              acceptance.</span
+            >
+          </div>
+          <div class="confirm-note note-err gone" id="conf-note-err">
+            <span>⚠</span
+            ><span
+              >This is permanent and cannot be undone. The author will be
+              notified of the rejection.</span
+            >
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button
+            class="btn btn-outline btn-sm"
+            onclick="closeModal('conf-modal')"
+          >
+            Cancel
+          </button>
+          <button class="btn btn-sm" id="conf-ok">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+      /* ── INIT ── */
+      var user = Auth.requireAuth();
+      if (!user) throw new Error();
+      buildNavbar('dashboard');
+
+      var titles = {
+        author: [
+          'My Submissions',
+          'Your submitted papers and their review status.',
+        ],
+        reviewer: ['Assigned Papers', 'Papers assigned to you for review.'],
+        admin: [
+          'All Papers',
+          'Manage submissions, assign reviewers, make decisions.',
+        ],
+      };
+      document.getElementById('p-title').textContent = titles[user.role][0];
+      document.getElementById('p-sub').textContent = titles[user.role][1];
+
+      if (user.role === 'author')
+        document.getElementById('p-action').innerHTML =
+          '<a href="submit.html" class="btn btn-gold">+ Submit Paper</a>';
+
+      /* ── SHARED RENDER HELPERS ── */
+      function renderReviews(reviews) {
+        if (!reviews || !reviews.length) return '';
+        return (
+          '<div class="sec-label">Reviews (' +
+          reviews.length +
+          ')</div>' +
+          reviews
+            .map(function (r) {
+              return (
+                '<div class="rev-card">' +
+                '<div class="rev-head"><span class="rev-name">' +
+                (r.reviewerId && r.reviewerId.name
+                  ? r.reviewerId.name
+                  : 'Reviewer') +
+                '</span>' +
+                starsHtml(r.rating) +
+                '</div>' +
+                '<p class="rev-body">' +
+                r.comment +
+                '</p>' +
+                recBadge(r.recommendation) +
+                '</div>'
+              );
+            })
+            .join('')
+        );
+      }
+
+      function renderDecision(paper) {
+        if (!paper.finalDecision || !paper.finalDecision.decision) return '';
+        var ok = paper.status === 'accepted';
+        return (
+          '<div class="dec-box ' +
+          (ok ? 'dec-ok' : 'dec-no') +
+          '">' +
+          '<div class="dec-title" style="color:' +
+          (ok ? '#1e6b45' : '#c0392b') +
+          '">' +
+          (ok ? '✓ Paper Accepted' : '✕ Paper Rejected') +
+          '</div>' +
+          (paper.finalDecision.comments
+            ? '<p style="font-size:.85rem;color:#3a4a5c;margin-top:4px">' +
+              paper.finalDecision.comments +
+              '</p>'
+            : '') +
+          '<p style="font-size:.75rem;color:#7a8899;margin-top:4px">Decided ' +
+          formatDate(paper.finalDecision.decidedAt) +
+          '</p>' +
+          '</div>'
+        );
+      }
+
+      /* ── AUTHOR VIEW ── */
+      async function loadAuthor() {
+        var res = await Api.get('/my-papers');
+        var box = document.getElementById('panel-papers');
+        if (!res || !res.ok) {
+          box.innerHTML = '<p style="color:#7a8899">Failed to load papers.</p>';
+          return;
+        }
+        var papers = res.data.papers;
+        if (!papers.length) {
+          box.innerHTML =
+            '<div class="empty"><div class="empty-icon">📄</div><h3 class="empty-title">No papers yet</h3><p>Submit your first research paper to get started.</p><a href="submit.html" class="btn btn-gold" style="margin-top:16px">Submit Paper</a></div>';
+          return;
+        }
+        box.innerHTML =
+          '<div class="grid">' +
+          papers
+            .map(function (p) {
+              return (
+                '<div class="card">' +
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:4px">' +
+                '<div class="card-title">' +
+                p.title +
+                '</div>' +
+                statusBadge(p.status) +
+                '</div>' +
+                '<div class="card-meta">Submitted ' +
+                formatDate(p.submittedAt) +
+                '</div>' +
+                '<p class="card-abstract">' +
+                p.abstract +
+                '</p>' +
+                renderDecision(p) +
+                renderReviews(p.reviews) +
+                '<div class="card-foot">' +
+                '<span style="font-size:.78rem;color:#7a8899">' +
+                (p.reviewers && p.reviewers.length
+                  ? p.reviewers.length + ' reviewer(s) assigned'
+                  : 'Awaiting assignment') +
+                '</span>' +
+                '<a href="' +
+                pdfUrl(p.fileUrl) +
+                '" target="_blank" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
+                '</div>' +
+                '</div>'
+              );
+            })
+            .join('') +
+          '</div>';
+      }
+
+      /* ── REVIEWER VIEW ── */
+      async function loadReviewer() {
+        var res = await Api.get('/assigned-papers');
+        var box = document.getElementById('panel-papers');
+        if (!res || !res.ok) {
+          box.innerHTML = '<p style="color:#7a8899">Failed to load papers.</p>';
+          return;
+        }
+        var papers = res.data.papers;
+        if (!papers.length) {
+          box.innerHTML =
+            '<div class="empty"><div class="empty-icon">🔍</div><h3 class="empty-title">No papers assigned</h3><p>You have no papers to review yet. Check back later.</p></div>';
+          return;
+        }
+        box.innerHTML =
+          '<div class="grid">' +
+          papers
+            .map(function (p) {
+              var done = !!p.myReview;
+              return (
+                '<div class="card">' +
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:4px">' +
+                '<div class="card-title">' +
+                p.title +
+                '</div>' +
+                (done
+                  ? '<span style="background:#edfaf3;color:#1e6b45;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;">✓ Reviewed</span>'
+                  : statusBadge(p.status)) +
+                '</div>' +
+                '<div class="card-meta">By ' +
+                (p.authorId ? p.authorId.name : '') +
+                ' · ' +
+                formatDate(p.submittedAt) +
+                '</div>' +
+                '<p class="card-abstract">' +
+                p.abstract +
+                '</p>' +
+                (done
+                  ? '<div class="sec-label">Your Review</div><div class="rev-card">' +
+                    '<div class="rev-head"><span class="rev-name">Your rating</span>' +
+                    starsHtml(p.myReview.rating) +
+                    '</div>' +
+                    '<p class="rev-body">' +
+                    p.myReview.comment +
+                    '</p>' +
+                    recBadge(p.myReview.recommendation) +
+                    '</div>'
+                  : '') +
+                '<div class="card-foot">' +
+                '<a href="' +
+                pdfUrl(p.fileUrl) +
+                '" target="_blank" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
+                (!done
+                  ? '<button class="btn btn-primary btn-sm" onclick="openRevModal(\'' +
+                    p._id +
+                    "','" +
+                    p.title.replace(/'/g, "\\'") +
+                    '\')">Write Review</button>'
+                  : '<span style="background:#eaf2fb;color:#1a5276;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;">Review submitted</span>') +
+                '</div>' +
+                '</div>'
+              );
+            })
+            .join('') +
+          '</div>';
+      }
+
+      /* ── ADMIN VIEW ── */
+      async function loadAdmin() {
+        document.getElementById('tab-bar').classList.remove('gone');
+        var sr = await Api.get('/stats');
+        if (sr && sr.ok) {
+          var s = sr.data.stats;
+          var row = document.getElementById('stats-row');
+          row.classList.remove('gone');
+          row.innerHTML =
+            '<div class="stats">' +
+            [
+              ['Total', s.totalPapers],
+              ['Pending', s.pendingPapers],
+              ['In Review', s.underReviewPapers],
+              ['Accepted', s.acceptedPapers],
+              ['Rejected', s.rejectedPapers],
+              ['Reviews', s.totalReviews],
+              ['Reviewers', s.totalReviewers],
+              ['Authors', s.totalAuthors],
+            ]
+              .map(function (x) {
+                return (
+                  '<div class="stat-card"><div class="stat-num">' +
+                  x[1] +
+                  '</div><div class="stat-lbl">' +
+                  x[0] +
+                  '</div></div>'
+                );
+              })
+              .join('') +
+            '</div>';
+        }
+        await loadAdminPapers();
+      }
+
+      async function loadAdminPapers() {
+        var res = await Api.get('/all-papers');
+        var box = document.getElementById('panel-papers');
+        if (!res || !res.ok) {
+          box.innerHTML = '<p style="color:#7a8899">Failed to load.</p>';
+          return;
+        }
+        var papers = res.data.papers;
+        if (!papers.length) {
+          box.innerHTML =
+            '<div class="empty"><div class="empty-icon">📭</div><h3 class="empty-title">No papers yet</h3></div>';
+          return;
+        }
+        box.innerHTML =
+          '<div class="grid">' +
+          papers
+            .map(function (p) {
+              var reviews = p.reviews || [];
+              var hasRevrs = p.reviewers && p.reviewers.length >= 2;
+              var hasDec = p.finalDecision && p.finalDecision.decision;
+              var canDecide = reviews.length > 0 && !hasDec;
+              return (
+                '<div class="card">' +
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:4px">' +
+                '<div class="card-title">' +
+                p.title +
+                '</div>' +
+                statusBadge(p.status) +
+                '</div>' +
+                '<div class="card-meta">By <strong>' +
+                (p.authorId ? p.authorId.name : '') +
+                '</strong> · ' +
+                formatDate(p.submittedAt) +
+                '</div>' +
+                '<p class="card-abstract">' +
+                p.abstract +
+                '</p>' +
+                '<div class="sec-label">Reviewers</div>' +
+                (hasRevrs
+                  ? '<div class="chips">' +
+                    p.reviewers
+                      .map(function (r) {
+                        return (
+                          '<span class="chip">👤 ' +
+                          r.name +
+                          (r.expertise ? ' · ' + r.expertise : '') +
+                          '</span>'
+                        );
+                      })
+                      .join('') +
+                    '</div>'
+                  : '<div style="display:flex;align-items:center;gap:10px;margin-top:6px"><span style="font-size:.8rem;color:#7a8899">None assigned</span><button class="btn btn-outline btn-sm" onclick="assignRevrs(\'' +
+                    p._id +
+                    '\',this)">⚡ Auto-Assign</button></div><br>') +
+                renderReviews(reviews) +
+                renderDecision(p) +
+                (canDecide
+                  ? '<div class="dec-form">' +
+                    '<div class="dec-label">Make Final Decision</div>' +
+                    '<textarea class="dec-input" id="dc-' +
+                    p._id +
+                    '" placeholder="Optional editor comments for the author..."></textarea>' +
+                    '<div class="dec-btns">' +
+                    '<button class="btn btn-success btn-sm" onclick="confirmDecision(\'' +
+                    p._id +
+                    "','accept',this)\">✓ Accept</button>" +
+                    '<button class="btn btn-danger btn-sm"  onclick="confirmDecision(\'' +
+                    p._id +
+                    "','reject',this)\">✕ Reject</button>" +
+                    '</div>' +
+                    '</div>'
+                  : '') +
+                '<div class="card-foot">' +
+                '<span style="font-size:.78rem;color:#7a8899">' +
+                reviews.length +
+                '/' +
+                (p.reviewers ? p.reviewers.length : 0) +
+                ' reviews</span>' +
+                '<a href="' +
+                pdfUrl(p.fileUrl) +
+                '" target="_blank" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
+                '</div>' +
+                '</div>'
+              );
+            })
+            .join('') +
+          '</div>';
+      }
+
+      /* ── ADMIN ACTIONS ── */
+      async function assignRevrs(paperId, btn) {
+        setLoading(btn, true);
+        var res = await Api.post('/assign-reviewers', { paperId: paperId });
+        setLoading(btn, false);
+        if (res && res.ok) {
+          Toast.success('Reviewers assigned!', res.data.message);
+          await loadAdminPapers();
+        } else
+          Toast.error('Failed', res && res.data ? res.data.message : 'Error');
+      }
+
+      /* Opens custom confirm modal instead of browser confirm() */
+      function confirmDecision(paperId, decision, clickedBtn) {
+        var isAccept = decision === 'accept';
+        var card = clickedBtn.closest('.card');
+        var ptitle = card ? card.querySelector('.card-title').textContent : '';
+
+        document.getElementById('conf-title').textContent = isAccept
+          ? '✓ Accept Paper'
+          : '✕ Reject Paper';
+        document.getElementById('conf-icon').textContent = isAccept
+          ? '🎉'
+          : '🚫';
+        document.getElementById('conf-msg').textContent =
+          'Are you sure you want to ' +
+          (isAccept ? 'accept' : 'reject') +
+          ' this paper?';
+        document.getElementById('conf-sub').textContent = ptitle
+          ? '"' + ptitle + '"'
+          : '';
+
+        document
+          .getElementById('conf-note-ok')
+          .classList.toggle('gone', !isAccept);
+        document
+          .getElementById('conf-note-err')
+          .classList.toggle('gone', isAccept);
+
+        var okBtn = document.getElementById('conf-ok');
+        okBtn.textContent = isAccept ? '✓ Yes, Accept' : '✕ Yes, Reject';
+        okBtn.className =
+          'btn btn-sm ' + (isAccept ? 'btn-success' : 'btn-danger');
+
+        okBtn.onclick = async function () {
+          closeModal('conf-modal');
+          var comments =
+            (document.getElementById('dc-' + paperId) || {}).value || '';
+          setLoading(clickedBtn, true);
+          var res = await Api.post('/final-decision', {
+            paperId: paperId,
+            decision: decision,
+            comments: comments,
+          });
+          setLoading(clickedBtn, false);
+          if (res && res.ok) {
+            Toast.success(
+              isAccept ? 'Paper Accepted!' : 'Paper Rejected',
+              res.data.message
+            );
+            await loadAdminPapers();
+          } else
+            Toast.error('Failed', res && res.data ? res.data.message : 'Error');
+        };
+
+        openModal('conf-modal');
+      }
+
+      /* ── TABS ── */
+      async function switchTab(tab) {
+        document.querySelectorAll('.tab').forEach(function (b) {
+          b.classList.toggle('on', b.dataset.t === tab);
+        });
+        document
+          .getElementById('panel-papers')
+          .classList.toggle('gone', tab !== 'papers');
+        document
+          .getElementById('panel-reviews')
+          .classList.toggle('gone', tab !== 'reviews');
+        document
+          .getElementById('panel-users')
+          .classList.toggle('gone', tab !== 'users');
+        if (tab === 'reviews') await loadAllReviews();
+        if (tab === 'users') await loadAllReviewers();
+      }
+
+      async function loadAllReviews() {
+        var box = document.getElementById('panel-reviews');
+        box.innerHTML = '<div class="spinner"></div>';
+        var res = await Api.get('/all-reviews');
+        if (!res || !res.ok) {
+          box.innerHTML = '<p>Failed.</p>';
+          return;
+        }
+        if (!res.data.reviews.length) {
+          box.innerHTML =
+            '<div class="empty"><div class="empty-icon">💬</div><h3 class="empty-title">No reviews yet</h3></div>';
+          return;
+        }
+        box.innerHTML = res.data.reviews
+          .map(function (r) {
+            return (
+              '<div class="rev-card" style="margin-bottom:12px">' +
+              '<div class="rev-head"><div><span class="rev-name">' +
+              (r.reviewerId ? r.reviewerId.name : '') +
+              '</span>' +
+              '<span style="font-size:.78rem;color:#7a8899;margin-left:8px">on "' +
+              (r.paperId ? r.paperId.title : '?') +
+              '"</span></div>' +
+              starsHtml(r.rating) +
+              '</div>' +
+              '<p class="rev-body">' +
+              r.comment +
+              '</p>' +
+              '<div style="display:flex;gap:8px;align-items:center">' +
+              recBadge(r.recommendation) +
+              '<span style="font-size:.75rem;color:#7a8899">' +
+              formatDate(r.submittedAt) +
+              '</span></div>' +
+              '</div>'
+            );
+          })
+          .join('');
+      }
+
+      async function loadAllReviewers() {
+        var box = document.getElementById('panel-users');
+        box.innerHTML = '<div class="spinner"></div>';
+        var res = await Api.get('/reviewers');
+        if (!res || !res.ok) {
+          box.innerHTML = '<p>Failed.</p>';
+          return;
+        }
+        if (!res.data.reviewers.length) {
+          box.innerHTML =
+            '<div class="empty"><div class="empty-icon">👤</div><h3 class="empty-title">No reviewers yet</h3></div>';
+          return;
+        }
+        box.innerHTML =
+          '<div class="user-grid">' +
+          res.data.reviewers
+            .map(function (r) {
+              return (
+                '<div class="user-card">' +
+                '<div class="avatar">' +
+                r.name[0].toUpperCase() +
+                '</div>' +
+                '<div><div style="font-weight:700;font-size:.9rem">' +
+                r.name +
+                '</div>' +
+                '<div style="font-size:.78rem;color:#7a8899">' +
+                r.email +
+                '</div>' +
+                (r.expertise
+                  ? '<div style="font-size:.76rem;color:#c9a84c;margin-top:2px">' +
+                    r.expertise +
+                    '</div>'
+                  : '') +
+                '</div>' +
+                '</div>'
+              );
+            })
+            .join('') +
+          '</div>';
+      }
+
+      /* ── REVIEW MODAL ── */
+      function openRevModal(pid, ptitle) {
+        document.getElementById('rev-pid').value = pid;
+        document.getElementById('rev-ptitle').textContent = '"' + ptitle + '"';
+        document.getElementById('rev-rating').value = '0';
+        document.getElementById('rev-comment').value = '';
+        document.getElementById('rev-rec').value = '';
+        initStars('rev-stars', 'rev-rating');
+        openModal('rev-modal');
+      }
+
+      async function submitReview() {
+        var pid = document.getElementById('rev-pid').value;
+        var rating = document.getElementById('rev-rating').value;
+        var comment = document.getElementById('rev-comment').value.trim();
+        var rec = document.getElementById('rev-rec').value;
+        var btn = document.getElementById('rev-sub-btn');
+        if (!rating || rating === '0') {
+          Toast.warning('Rating required', 'Click a star to rate.');
+          return;
+        }
+        if (!comment) {
+          Toast.warning('Comment required', 'Write your review comments.');
+          return;
+        }
+        if (!rec) {
+          Toast.warning('Recommendation required', 'Select a recommendation.');
+          return;
+        }
+        setLoading(btn, true);
+        var res = await Api.post('/submit-review', {
+          paperId: pid,
+          rating: parseInt(rating),
+          comment: comment,
+          recommendation: rec,
+        });
+        setLoading(btn, false);
+        if (res && res.ok) {
+          closeModal('rev-modal');
+          Toast.success('Review submitted!', 'Your review has been saved.');
+          if (user.role === 'reviewer') await loadReviewer();
+        } else {
+          Toast.error('Failed', res && res.data ? res.data.message : 'Error');
+        }
+      }
+
+      /* ── START ── */
+      if (user.role === 'author') loadAuthor();
+      if (user.role === 'reviewer') loadReviewer();
+      if (user.role === 'admin') loadAdmin();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register — PeerReview</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        background: #f4f6f9;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 16px;
+      }
+
+      /* Centered white card */
+      .card {
+        background: #fff;
+        border: 1px solid #dde3ea;
+        border-radius: 14px;
+        padding: 36px 32px;
+        width: 100%;
+        max-width: 440px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+      }
+
+      /* Logo */
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        color: #0d1b2a;
+        text-decoration: none;
+        margin-bottom: 24px;
+      }
+      .brand-icon {
+        width: 30px;
+        height: 30px;
+        background: #c9a84c;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+      }
+
+      h2 {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0d1b2a;
+        margin-bottom: 4px;
+      }
+      .sub {
+        font-size: 0.875rem;
+        color: #7a8899;
+        margin-bottom: 22px;
+      }
+
+      /* Role cards */
+      .role-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 4px;
+      }
+      .role-card {
+        border: 2px solid #dde3ea;
+        border-radius: 10px;
+        padding: 14px;
+        text-align: center;
+        cursor: pointer;
+        background: #fff;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .role-card:hover {
+        border-color: #0d1b2a;
+      }
+      .role-card.picked {
+        border-color: #0d1b2a;
+        background: #f0f4ff;
+      }
+      .role-card input {
+        display: none;
+      }
+      .role-icon {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+      }
+      .role-name {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #0d1b2a;
+        display: block;
+      }
+      .role-desc {
+        font-size: 0.73rem;
+        color: #7a8899;
+      }
+
+      /* Form fields */
+      .field {
+        margin-bottom: 15px;
+      }
+      .field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #3a4a5c;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .field input,
+      .field select {
+        width: 100%;
+        padding: 10px 14px;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 0.9rem;
+        color: #0d1b2a;
+        background: #fff;
+        border: 1.5px solid #dde3ea;
+        border-radius: 8px;
+        outline: none;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+        appearance: none;
+      }
+      .field input:focus {
+        border-color: #0d1b2a;
+        box-shadow: 0 0 0 3px rgba(13, 27, 42, 0.08);
+      }
+      .field input::placeholder {
+        color: #c0c8d0;
+      }
+      .hint {
+        font-size: 0.76rem;
+        color: #7a8899;
+        margin-top: 4px;
+      }
+
+      /* Hidden helper */
+      .gone {
+        display: none !important;
+      }
+
+      /* Submit button */
+      .btn {
+        width: 100%;
+        padding: 11px;
+        background: #c9a84c;
+        color: #0d1b2a;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.15s;
+        margin-top: 4px;
+      }
+      .btn:hover {
+        background: #e2c47a;
+      }
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .foot {
+        text-align: center;
+        font-size: 0.875rem;
+        color: #7a8899;
+        margin-top: 20px;
+      }
+      .foot a {
+        color: #0d1b2a;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <a href="login.html" class="brand">
+        <div class="brand-icon">📋</div>
+        PeerReview
+      </a>
+
+      <h2>Create an account</h2>
+      <p class="sub">Join as an author or reviewer.</p>
+
+      <form id="frm" novalidate>
+        <!-- Role selection -->
+        <div class="field">
+          <label>I am a...</label>
+          <div class="role-row">
+            <label class="role-card picked" id="card-author">
+              <input type="radio" name="role" value="author" checked />
+              <div class="role-icon">✍️</div>
+              <span class="role-name">Author</span>
+              <span class="role-desc">Submit papers for review</span>
+            </label>
+            <label class="role-card" id="card-reviewer">
+              <input type="radio" name="role" value="reviewer" />
+              <div class="role-icon">🔍</div>
+              <span class="role-name">Reviewer</span>
+              <span class="role-desc">Evaluate submitted papers</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" placeholder="Dr. Jane Smith" />
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@university.edu" />
+        </div>
+
+        <div class="field">
+          <label for="pass">Password</label>
+          <input type="password" id="pass" placeholder="Minimum 6 characters" />
+        </div>
+
+        <!-- Only shown when Reviewer is selected -->
+        <div class="field gone" id="exp-field">
+          <label for="expertise">Area of Expertise</label>
+          <input
+            type="text"
+            id="expertise"
+            placeholder="e.g. Machine Learning, Bioinformatics"
+          />
+          <span class="hint"
+            >Helps the system assign you to relevant papers.</span
+          >
+        </div>
+
+        <button type="submit" class="btn" id="sub-btn">Create Account</button>
+      </form>
+
+      <p class="foot">
+        Already have an account? <a href="login.html">Sign in</a>
+      </p>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+      if (Auth.isLoggedIn()) window.location.href = 'dashboard.html';
+
+      /* Role card toggle */
+      document.querySelectorAll('.role-card').forEach(function (card) {
+        card.addEventListener('click', function () {
+          document.querySelectorAll('.role-card').forEach(function (c) {
+            c.classList.remove('picked');
+          });
+          card.classList.add('picked');
+          var role = card.querySelector('input').value;
+          document
+            .getElementById('exp-field')
+            .classList.toggle('gone', role !== 'reviewer');
+        });
+      });
+
+      document
+        .getElementById('frm')
+        .addEventListener('submit', async function (e) {
+          e.preventDefault();
+          var name = document.getElementById('name').value.trim();
+          var email = document.getElementById('email').value.trim();
+          var pass = document.getElementById('pass').value;
+          var role = document.querySelector('input[name="role"]:checked').value;
+          var expertise = document.getElementById('expertise').value.trim();
+          var btn = document.getElementById('sub-btn');
+
+          /* Validation — all custom toasts, no browser popups */
+          if (!name) {
+            Toast.warning('Name required', 'Please enter your full name.');
+            return;
+          }
+          if (!email || !email.includes('@')) {
+            Toast.warning('Email required', 'Please enter a valid email.');
+            return;
+          }
+          if (pass.length < 6) {
+            Toast.error(
+              'Password too short',
+              'Password must be at least 6 characters.'
+            );
+            return;
+          }
+          if (role === 'reviewer' && !expertise) {
+            Toast.warning(
+              'Expertise required',
+              'Please enter your area of expertise.'
+            );
+            return;
+          }
+
+          setLoading(btn, true);
+          var res = await Api.post('/register', {
+            name,
+            email,
+            password: pass,
+            role,
+            expertise,
+          });
+          setLoading(btn, false);
+
+          if (res && res.ok) {
+            Auth.save(res.data.token, res.data.user);
+            Toast.success(
+              'Account created!',
+              'Welcome, ' + res.data.user.name + '!'
+            );
+            setTimeout(function () {
+              window.location.href = 'dashboard.html';
+            }, 600);
+          } else {
+            Toast.error(
+              'Registration failed',
+              res && res.data ? res.data.message : 'Something went wrong.'
+            );
+          }
+        });
+    </script>
+  </body>
+</html>

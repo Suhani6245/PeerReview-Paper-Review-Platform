@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Review Paper — PeerReview</title>
+    <style>
+      /* ── Base ── */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        background: #f4f6f9;
+        color: #0d1b2a;
+      }
+
+      .wrap {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+      .page {
+        padding: 36px 0 80px;
+      }
+
+      /* Page header */
+      .ph {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+      }
+      .ph h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+      .ph p {
+        font-size: 0.875rem;
+        color: #7a8899;
+        margin-top: 4px;
+      }
+
+      /* Back button */
+      .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: #fff;
+        color: #0d1b2a;
+        border: 1.5px solid #dde3ea;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: border-color 0.15s;
+        white-space: nowrap;
+      }
+      .btn-back:hover {
+        border-color: #0d1b2a;
+      }
+
+      /* Two-column layout */
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 24px;
+        align-items: start;
+      }
+
+      /* White card */
+      .card {
+        background: #fff;
+        border: 1px solid #dde3ea;
+        border-radius: 14px;
+        padding: 26px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      /* Already-reviewed success box */
+      .reviewed-box {
+        background: #edfaf3;
+        border: 1.5px solid #a7d9bc;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+      }
+      .reviewed-box h4 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1e6b45;
+        margin-bottom: 4px;
+      }
+      .reviewed-box p {
+        font-size: 0.84rem;
+        color: #3a4a5c;
+      }
+
+      /* Review display card */
+      .rev-card {
+        background: #f8f9fb;
+        border: 1px solid #dde3ea;
+        border-radius: 8px;
+        padding: 14px;
+      }
+      .rev-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .rev-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #0d1b2a;
+      }
+      .rev-body {
+        font-size: 0.85rem;
+        color: #3a4a5c;
+        line-height: 1.6;
+        margin: 8px 0;
+      }
+
+      /* Form section title */
+      .form-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #0d1b2a;
+        margin-bottom: 20px;
+      }
+
+      /* Form fields */
+      .field {
+        margin-bottom: 18px;
+      }
+      .field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #3a4a5c;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .field textarea,
+      .field select {
+        width: 100%;
+        padding: 10px 14px;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 0.9rem;
+        color: #0d1b2a;
+        background: #fff;
+        border: 1.5px solid #dde3ea;
+        border-radius: 8px;
+        outline: none;
+        transition: border-color 0.15s;
+        appearance: none;
+      }
+      .field textarea:focus,
+      .field select:focus {
+        border-color: #0d1b2a;
+        box-shadow: 0 0 0 3px rgba(13, 27, 42, 0.08);
+      }
+      .field textarea {
+        resize: vertical;
+        min-height: 140px;
+        line-height: 1.6;
+      }
+      .hint {
+        font-size: 0.76rem;
+        color: #7a8899;
+        margin-top: 4px;
+      }
+
+      /* Star rating container */
+      .stars-row {
+        display: flex;
+        gap: 6px;
+        margin: 6px 0;
+      }
+
+      /* Submit button */
+      .btn-submit {
+        padding: 10px 24px;
+        background: #c9a84c;
+        color: #0d1b2a;
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .btn-submit:hover {
+        background: #e2c47a;
+      }
+      .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      /* PDF viewer card (sticky) */
+      .pdf-card {
+        position: sticky;
+        top: 72px;
+        background: #fff;
+        border: 1px solid #dde3ea;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+      .pdf-head {
+        padding: 12px 16px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #3a4a5c;
+        border-bottom: 1px solid #dde3ea;
+        background: #fafbfc;
+      }
+      .pdf-foot {
+        padding: 10px 14px;
+        border-top: 1px solid #dde3ea;
+        background: #fafbfc;
+      }
+
+      /* Open in tab button */
+      .btn-open {
+        display: block;
+        width: 100%;
+        padding: 8px;
+        background: #fff;
+        color: #0d1b2a;
+        border: 1.5px solid #dde3ea;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        transition: border-color 0.15s;
+      }
+      .btn-open:hover {
+        border-color: #0d1b2a;
+      }
+
+      /* Spinner */
+      .spinner {
+        width: 30px;
+        height: 30px;
+        border: 3px solid #dde3ea;
+        border-top-color: #0d1b2a;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 48px auto;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .gone {
+        display: none !important;
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .pdf-card {
+          position: static;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav id="navbar"></nav>
+
+    <div class="wrap">
+      <div class="page">
+        <!-- Page header -->
+        <div class="ph">
+          <div>
+            <h1 id="paper-title">Loading paper...</h1>
+            <p id="paper-meta"></p>
+          </div>
+          <a href="dashboard.html" class="btn-back">← Back</a>
+        </div>
+
+        <div class="layout">
+          <!-- LEFT: review form -->
+          <div>
+            <!-- Shown if already reviewed -->
+            <div id="already-box" class="gone">
+              <div class="reviewed-box">
+                <h4>✓ You already reviewed this paper</h4>
+                <p>Your submitted review is shown below.</p>
+              </div>
+              <div id="existing-review"></div>
+            </div>
+
+            <!-- Shown if not yet reviewed -->
+            <div class="card" id="form-area">
+              <div class="spinner" id="form-spinner"></div>
+
+              <div id="form-inner" class="gone">
+                <h3 class="form-title">Submit Your Review</h3>
+
+                <div class="field">
+                  <label>Your Rating *</label>
+                  <div class="stars-row" id="star-box"></div>
+                  <input type="hidden" id="rating-val" value="0" />
+                  <span class="hint"
+                    >Click a star — 1 (poor) to 5 (excellent)</span
+                  >
+                </div>
+
+                <div class="field">
+                  <label for="comment">Review Comments *</label>
+                  <textarea
+                    id="comment"
+                    rows="8"
+                    placeholder="Provide detailed feedback on originality, methodology, clarity, significance of findings..."
+                  ></textarea>
+                </div>
+
+                <div class="field">
+                  <label for="rec">Recommendation *</label>
+                  <select id="rec">
+                    <option value="">— Select —</option>
+                    <option value="accept">Accept</option>
+                    <option value="major_revision">
+                      Major Revision Required
+                    </option>
+                    <option value="minor_revision">
+                      Minor Revision Required
+                    </option>
+                    <option value="reject">Reject</option>
+                  </select>
+                </div>
+
+                <button
+                  class="btn-submit"
+                  id="sub-btn"
+                  onclick="submitReview()"
+                >
+                  Submit Review
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: PDF info + download -->
+          <div class="pdf-card">
+            <div class="pdf-head">📄 Paper PDF</div>
+            <div style="padding: 28px 20px; text-align: center">
+              <div style="font-size: 3rem; margin-bottom: 14px">📄</div>
+              <p
+                style="
+                  font-size: 0.875rem;
+                  color: #3a4a5c;
+                  margin-bottom: 6px;
+                  font-weight: 600;
+                "
+                id="pdf-filename"
+              >
+                Loading...
+              </p>
+              <p
+                style="font-size: 0.78rem; color: #7a8899; margin-bottom: 20px"
+              >
+                Download the paper to read it in your PDF viewer.
+              </p>
+              <a
+                id="pdf-link"
+                href="#"
+                class="btn-open"
+                style="display: inline-block; width: auto; padding: 10px 24px"
+              >
+                📥 Download PDF
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+      /* Only reviewers can access this page */
+      var user = Auth.requireAuth('reviewer');
+      if (!user) throw new Error('Not authorized');
+      buildNavbar('dashboard');
+
+      /* Get paper ID from URL: review.html?id=PAPERID */
+      var paperId = new URLSearchParams(window.location.search).get('id');
+      if (!paperId) window.location.href = 'dashboard.html';
+
+      async function loadPaper() {
+        var res = await Api.get('/paper/' + paperId);
+
+        if (!res || !res.ok) {
+          Toast.error('Error', 'Could not load this paper.');
+          return;
+        }
+
+        var paper = res.data.paper;
+
+        /* Set title and meta */
+        document.getElementById('paper-title').textContent = paper.title;
+        document.getElementById('paper-meta').textContent =
+          'By ' +
+          (paper.authorId ? paper.authorId.name : '') +
+          '  ·  Submitted ' +
+          formatDate(paper.submittedAt);
+
+        /* Load PDF */
+        var downloadLink = pdfUrl(paper.fileUrl);
+        document.getElementById('pdf-link').href = downloadLink;
+        document.getElementById('pdf-filename').textContent =
+          paper.fileName || paper.fileUrl.replace(/^.*[\\/]/, '');
+
+        /* Check if this reviewer already submitted a review */
+        var reviews = paper.reviews || [];
+        var myReview = null;
+        for (var i = 0; i < reviews.length; i++) {
+          var rid = reviews[i].reviewerId;
+          var ridStr = rid && rid._id ? rid._id : rid;
+          if (ridStr === user._id) {
+            myReview = reviews[i];
+            break;
+          }
+        }
+
+        /* Hide spinner */
+        document.getElementById('form-spinner').classList.add('gone');
+
+        if (myReview) {
+          /* Hide form, show already-reviewed box */
+          document.getElementById('form-area').classList.add('gone');
+          document.getElementById('already-box').classList.remove('gone');
+
+          /* Build the rec badge inline */
+          var recColors = {
+            accept: ['#edfaf3', '#1e6b45', '✓ Accept'],
+            reject: ['#fdf2f0', '#c0392b', '✕ Reject'],
+            major_revision: ['#fef9ec', '#9a6a00', '⚠ Major Revision'],
+            minor_revision: ['#eaf2fb', '#1a5276', '↺ Minor Revision'],
+          };
+          var rc = recColors[myReview.recommendation] || [
+            '#f0f0f0',
+            '#555',
+            myReview.recommendation,
+          ];
+
+          /* Build stars display */
+          var starsStr = '';
+          for (var s = 1; s <= 5; s++)
+            starsStr +=
+              '<span style="color:' +
+              (s <= myReview.rating ? '#f59e0b' : '#dde3ea') +
+              ';font-size:.9rem;">★</span>';
+
+          document.getElementById('existing-review').innerHTML =
+            '<div class="rev-card">' +
+            '<div class="rev-head">' +
+            '<span class="rev-name">Your review</span>' +
+            '<span>' +
+            starsStr +
+            '</span>' +
+            '</div>' +
+            '<p class="rev-body">' +
+            myReview.comment +
+            '</p>' +
+            '<span style="background:' +
+            rc[0] +
+            ';color:' +
+            rc[1] +
+            ';padding:3px 10px;border-radius:20px;font-size:.74rem;font-weight:700;">' +
+            rc[2] +
+            '</span>' +
+            '<span style="font-size:.75rem;color:#7a8899;margin-left:8px">' +
+            formatDate(myReview.submittedAt) +
+            '</span>' +
+            '</div>';
+        } else {
+          /* Show the form */
+          document.getElementById('form-inner').classList.remove('gone');
+          initStars('star-box', 'rating-val');
+        }
+      }
+
+      async function submitReview() {
+        var rating = document.getElementById('rating-val').value;
+        var comment = document.getElementById('comment').value.trim();
+        var rec = document.getElementById('rec').value;
+        var btn = document.getElementById('sub-btn');
+
+        if (!rating || rating === '0') {
+          Toast.warning('Rating required', 'Click a star to rate.');
+          return;
+        }
+        if (comment.length < 10) {
+          Toast.warning(
+            'Comment too short',
+            'Please write more detailed feedback.'
+          );
+          return;
+        }
+        if (!rec) {
+          Toast.warning(
+            'Recommendation required',
+            'Please select a recommendation.'
+          );
+          return;
+        }
+
+        setLoading(btn, true);
+        var res = await Api.post('/submit-review', {
+          paperId: paperId,
+          rating: parseInt(rating),
+          comment: comment,
+          recommendation: rec,
+        });
+        setLoading(btn, false);
+
+        if (res && res.ok) {
+          Toast.success('Review submitted!', 'Thank you for your review.');
+          setTimeout(function () {
+            window.location.href = 'dashboard.html';
+          }, 800);
+        } else {
+          Toast.error(
+            'Submission failed',
+            res && res.data ? res.data.message : 'Something went wrong.'
+          );
+        }
+      }
+
+      loadPaper();
+    </script>
+  </body>
+</html>

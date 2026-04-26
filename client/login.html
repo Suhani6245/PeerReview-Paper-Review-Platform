@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In — PeerReview</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      }
+
+      /* Full-screen split: image left, form right */
+      .page {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 100vh;
+      }
+
+      /* ── LEFT PANEL ── */
+      .left {
+        background-image: url('bg.jpg');
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 60px 50px;
+      }
+      /* Dark overlay so text is readable over any image */
+      .left-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(13, 27, 42, 0.68);
+      }
+      /* Content sits above the overlay */
+      .left-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Brand logo row */
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 48px;
+      }
+      .brand-icon {
+        width: 50px;
+        height: 50px;
+        background: #c9a84c;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+      }
+      .brand-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #fff;
+        display: block;
+      }
+      .brand-sub {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .headline {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.25;
+        margin-bottom: 14px;
+      }
+      .tagline {
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.6);
+        line-height: 1.7;
+        max-width: 360px;
+        margin-bottom: 36px;
+      }
+
+      /* Feature bullet list */
+      .features {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .features li {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.7);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .features li::before {
+        content: '✓';
+        color: #c9a84c;
+        font-weight: 700;
+      }
+
+      /* ── RIGHT PANEL ── */
+      .right {
+        background: #f4f6f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 40px;
+      }
+      .form-box {
+        width: 100%;
+        max-width: 500px;
+      }
+
+      .form-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0d1b2a;
+        margin-bottom: 6px;
+      }
+      .form-sub {
+        font-size: 0.9rem;
+        color: #7a8899;
+        margin-bottom: 28px;
+      }
+
+      /* Demo quick-fill buttons */
+      .demo-row {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 20px;
+      }
+      .demo-btn {
+        flex: 1;
+        padding: 9px 10px;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        background: #fff;
+        border: 1px solid #dde3ea;
+        border-radius: 6px;
+        cursor: pointer;
+        color: #3a4a5c;
+        transition: border-color 0.15s;
+      }
+      .demo-btn:hover {
+        border-color: #0d1b2a;
+        color: #0d1b2a;
+      }
+
+      /* Form fields */
+      .field {
+        margin-bottom: 16px;
+      }
+      .field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #3a4a5c;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .field input {
+        width: 100%;
+        padding: 10px 14px;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 0.9rem;
+        color: #0d1b2a;
+        background: #fff;
+        border: 1.5px solid #dde3ea;
+        border-radius: 8px;
+        outline: none;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+      }
+      .field input:focus {
+        border-color: #0d1b2a;
+        box-shadow: 0 0 0 3px rgba(13, 27, 42, 0.08);
+      }
+      .field input::placeholder {
+        color: #c0c8d0;
+      }
+
+      /* Submit button */
+      .btn-submit {
+        width: 100%;
+        padding: 11px;
+        background: #c9a84c;
+        color: #0d1b2a;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.15s;
+        margin-top: 4px;
+      }
+      .btn-submit:hover {
+        background: #e2c47a;
+      }
+      .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .footer-link {
+        text-align: center;
+        font-size: 0.875rem;
+        color: #7a8899;
+        margin-top: 22px;
+      }
+      .footer-link a {
+        color: #0d1b2a;
+        font-weight: 600;
+      }
+
+      /* Mobile: hide image panel */
+      @media (max-width: 700px) {
+        .page {
+          grid-template-columns: 1fr;
+        }
+        .left {
+          display: none;
+        }
+        .right {
+          padding: 40px 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- LEFT: background image + branding -->
+      <div class="left">
+        <div class="left-overlay"></div>
+        <div class="left-content">
+          <div class="brand">
+            <div class="brand-icon">📋</div>
+            <div>
+              <span class="brand-name">PeerReview</span>
+              <span class="brand-sub">Academic Platform</span>
+            </div>
+          </div>
+          <h1 class="headline">Scholarly review,<br />simplified.</h1>
+          <p class="tagline">
+            A platform for authors, reviewers, and editors to collaborate on
+            academic peer review — transparently and efficiently.
+          </p>
+          <ul class="features">
+            <li>Submit research papers with PDF upload</li>
+            <li>Automatic reviewer assignment</li>
+            <li>Star ratings and detailed feedback</li>
+            <li>Final editorial decisions visible to authors</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- RIGHT: login form -->
+      <div class="right">
+        <div class="form-box">
+          <h2 class="form-title">Welcome back</h2>
+          <p class="form-sub">Sign in to access your dashboard.</p>
+
+          <!-- Quick demo fill -->
+          <div class="demo-row">
+            <button
+              class="demo-btn"
+              onclick="fill('admin@review.com', 'admin123')"
+            >
+              Admin Demo
+            </button>
+            <button
+              class="demo-btn"
+              onclick="fill('author@demo.com', 'demo123')"
+            >
+              Author Demo
+            </button>
+            <button
+              class="demo-btn"
+              onclick="fill('reviewer@demo.com', 'demo123')"
+            >
+              Reviewer Demo
+            </button>
+          </div>
+
+          <form id="frm" novalidate>
+            <div class="field">
+              <label for="email">Email</label>
+              <input type="email" id="email" placeholder="you@university.edu" />
+            </div>
+            <div class="field">
+              <label for="pass">Password</label>
+              <input type="password" id="pass" placeholder="••••••••" />
+            </div>
+            <button type="submit" class="btn-submit" id="sub-btn">
+              Sign In →
+            </button>
+          </form>
+
+          <p class="footer-link">
+            No account yet? <a href="register.html">Register here</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+      if (Auth.isLoggedIn()) window.location.href = 'dashboard.html';
+
+      function fill(email, pass) {
+        document.getElementById('email').value = email;
+        document.getElementById('pass').value = pass;
+      }
+
+      document
+        .getElementById('frm')
+        .addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const email = document.getElementById('email').value.trim();
+          const pass = document.getElementById('pass').value;
+          const btn = document.getElementById('sub-btn');
+
+          if (!email || !email.includes('@')) {
+            Toast.warning('Email required', 'Enter a valid email.');
+            return;
+          }
+          if (!pass) {
+            Toast.warning('Password required', 'Enter your password.');
+            return;
+          }
+
+          setLoading(btn, true);
+          const res = await Api.post('/login', { email, password: pass });
+          setLoading(btn, false);
+
+          if (res && res.ok) {
+            Auth.save(res.data.token, res.data.user);
+            Toast.success('Welcome back!', res.data.user.name);
+            setTimeout(function () {
+              window.location.href = 'dashboard.html';
+            }, 600);
+          } else {
+            Toast.error(
+              'Sign in failed',
+              res && res.data ? res.data.message : 'Something went wrong.'
+            );
+          }
+        });
+    </script>
+  </body>
+</html>
