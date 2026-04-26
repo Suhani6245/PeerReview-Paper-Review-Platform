@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const { pipeline } = require('stream');
 const { promisify } = require('util');
 const streamPipeline = promisify(pipeline);
@@ -416,7 +417,18 @@ router.get('/paper/:id/download', authenticate, async (req, res) => {
     console.log('[DOWNLOAD_FILE]', filename, fileUrl);
 
     if (fileUrl.startsWith('/uploads/') || fileUrl.startsWith('uploads/')) {
-      return res.download(fileUrl, filename);
+      const normalizedPath = fileUrl.replace(/^\/+/, '');
+      const localFilePath = path.join(__dirname, '..', normalizedPath);
+
+      return res.download(localFilePath, filename, (err) => {
+        if (err && !res.headersSent) {
+          console.error('[DOWNLOAD_LOCAL_ERROR]', err);
+          return res.status(404).json({
+            success: false,
+            message: 'Local PDF file not found.',
+          });
+        }
+      });
     }
 
     console.log('[FETCHING_CLOUDINARY]', fileUrl);
@@ -435,9 +447,9 @@ router.get('/paper/:id/download', authenticate, async (req, res) => {
       `attachment; filename="${filename.replace(/"/g, '')}"`
     );
 
-    response.data.pipe(res);
+    await streamPipeline(response.data, res);
   } catch (err) {
-    console.error('[DOWNLOAD_PAPER_ERROR]', err.message);
+    console.error('[DOWNLOAD_PAPER_ERROR]', err);
     if (!res.headersSent) {
       res.status(500).json({ success: false, message: 'Download failed.' });
     }
