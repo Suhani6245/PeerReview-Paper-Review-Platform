@@ -99,7 +99,7 @@ const seedAdmin = async () => {
       password: 'admin123',
       role: 'admin',
     });
-    console.log('👤 Default admin created: admin@review.com / admin123');
+    console.log('👤 Default admin created: admin@demo.com / demo123');
   }
 };
 
