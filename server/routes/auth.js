@@ -4,6 +4,8 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+const ORIGINAL_ADMIN_EMAIL = 'admin@review.com';
+
 /**
  * Helper: Generate JWT token for a user
  */
@@ -102,6 +104,12 @@ router.post('/login', async (req, res) => {
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid email or password.' });
+    }
+
+    if (user.role === 'admin' && user.email !== ORIGINAL_ADMIN_EMAIL) {
       return res
         .status(401)
         .json({ success: false, message: 'Invalid email or password.' });

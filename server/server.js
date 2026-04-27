@@ -78,6 +78,7 @@ const startServer = async () => {
     console.log('✅ Connected to MongoDB');
 
     await seedAdmin();
+    await seedDemoUsers();
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
@@ -89,17 +90,31 @@ const startServer = async () => {
   }
 };
 
-const seedAdmin = async () => {
+const seedDemoUsers = async () => {
   const User = require('./models/User');
-  const exists = await User.findOne({ role: 'admin' });
-  if (!exists) {
-    await User.create({
-      name: 'Admin',
-      email: 'admin@review.com',
-      password: 'admin123',
-      role: 'admin',
-    });
-    console.log('👤 Default admin created: admin@demo.com / demo123');
+
+  const demoUsers = [
+    {
+      name: 'Author Demo',
+      email: 'author@demo.com',
+      password: 'demo123',
+      role: 'author',
+    },
+    {
+      name: 'Reviewer Demo',
+      email: 'reviewer@demo.com',
+      password: 'demo123',
+      role: 'reviewer',
+      expertise: 'Machine Learning',
+    },
+  ];
+
+  for (const userData of demoUsers) {
+    const exists = await User.findOne({ email: userData.email });
+    if (!exists) {
+      await User.create(userData);
+      console.log(`👤 Demo user created: ${userData.email} / ${userData.password}`);
+    }
   }
 };
 
