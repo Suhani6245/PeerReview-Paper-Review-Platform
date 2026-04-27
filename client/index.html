@@ -312,7 +312,7 @@
           <form id="frm" novalidate autocomplete="off">
             <div class="field">
               <label for="email">Email</label>
-              <input type="email" id="email" autocomplete="off" placeholder="admin@review.com" />
+              <input type="email" id="email" autocomplete="off" placeholder="admin@demo.com" />
             </div>
             <div class="field">
               <label for="pass">Password</label>
@@ -347,10 +347,10 @@
         passField.value = '';
         emailField.placeholder =
           role === 'admin'
-            ? 'admin@review.com'
+            ? 'admin@demo.com'
             : role === 'author'
-            ? 'author@review.com'
-            : 'reviewer@review.com';
+            ? 'author@demo.com'
+            : 'reviewer@demo.com';
         passField.placeholder = 'Enter password';
         roleLabel.textContent = 'Selected: ' + role.charAt(0).toUpperCase() + role.slice(1);
       }
