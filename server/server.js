@@ -66,6 +66,20 @@ app.use((err, req, res, next) => {
 });
 
 // ── Database + Start ──────────────────────────────────────────────────────────
+const seedAdmin = async () => {
+  const User = require('./models/User');
+  const exists = await User.findOne({ email: 'admin@review.com' });
+  if (!exists) {
+    await User.create({
+      name: 'Admin',
+      email: 'admin@review.com',
+      password: 'admin123',
+      role: 'admin',
+    });
+    console.log('👤 Seeded original admin: admin@review.com / admin123');
+  }
+};
+
 const startServer = async () => {
   try {
     if (!process.env.MONGO_URI) {
