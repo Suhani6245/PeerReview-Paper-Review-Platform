@@ -40,7 +40,7 @@ router.post(
       const keywordArray = keywords
         ? keywords
             .split(',')
-            .map(k => k.trim())
+            .map((k) => k.trim())
             .filter(Boolean)
         : [];
 
@@ -56,7 +56,11 @@ router.post(
       }
 
       if (!fileUrl.includes('cloudinary.com')) {
-        console.warn('[UPLOAD_WARNING]', 'Uploaded file URL is not Cloudinary:', fileUrl);
+        console.warn(
+          '[UPLOAD_WARNING]',
+          'Uploaded file URL is not Cloudinary:',
+          fileUrl
+        );
       }
 
       const paper = await Paper.create({
@@ -241,7 +245,7 @@ router.post(
 
       const selected = reviewers.sort(() => 0.5 - Math.random()).slice(0, 2);
 
-      paper.reviewers = selected.map(r => r._id);
+      paper.reviewers = selected.map((r) => r._id);
       paper.status = 'under_review';
 
       await paper.save();
@@ -251,7 +255,7 @@ router.post(
 
       res.json({
         success: true,
-        message: `Assigned ${selected.map(r => r.name).join(' and ')}`,
+        message: `Assigned ${selected.map((r) => r.name).join(' and ')}`,
         paper,
       });
     } catch (err) {
@@ -351,7 +355,8 @@ router.get('/paper/:id', authenticate, async (req, res) => {
       });
     }
 
-    const isAuthor = paper.authorId?._id?.toString() === req.user._id.toString();
+    const isAuthor =
+      paper.authorId?._id?.toString() === req.user._id.toString();
     const isReviewer = paper.reviewers?.some(
       (r) => r._id.toString() === req.user._id.toString()
     );
@@ -391,7 +396,9 @@ router.get('/paper/:id/download', authenticate, async (req, res) => {
     const paper = await Paper.findById(req.params.id);
 
     if (!paper) {
-      return res.status(404).json({ success: false, message: 'Paper not found.' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Paper not found.' });
     }
 
     const isAuthor = paper.authorId?.toString() === req.user._id.toString();
@@ -401,11 +408,15 @@ router.get('/paper/:id/download', authenticate, async (req, res) => {
     const isAdmin = req.user.role === 'admin';
 
     if (!isAuthor && !isReviewer && !isAdmin) {
-      return res.status(403).json({ success: false, message: 'Access denied.' });
+      return res
+        .status(403)
+        .json({ success: false, message: 'Access denied.' });
     }
 
     if (!paper.fileUrl) {
-      return res.status(404).json({ success: false, message: 'PDF not available.' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'PDF not available.' });
     }
 
     const filename = paper.fileName || 'paper.pdf';
@@ -417,7 +428,10 @@ router.get('/paper/:id/download', authenticate, async (req, res) => {
       console.log('[CLOUDINARY_DOWNLOAD]', fileUrl);
       try {
         const response = await axios.get(fileUrl, { responseType: 'stream' });
-        res.set('Content-Type', response.headers['content-type'] || 'application/pdf');
+        res.set(
+          'Content-Type',
+          response.headers['content-type'] || 'application/pdf'
+        );
         res.set('Content-Disposition', `attachment; filename="${filename}"`);
         response.data.pipe(res);
       } catch (err) {
@@ -427,19 +441,33 @@ router.get('/paper/:id/download', authenticate, async (req, res) => {
           console.error('[CLOUDINARY_RESPONSE_HEADERS]', err.response.headers);
         }
 
-        if (err.response?.status === 401 && fileUrl.includes('/image/upload/')) {
+        if (
+          err.response?.status === 401 &&
+          fileUrl.includes('/image/upload/')
+        ) {
           const rawUrl = fileUrl.replace('/image/upload/', '/raw/upload/');
           console.log('[CLOUDINARY_FALLBACK]', rawUrl);
           try {
-            const fallbackResponse = await axios.get(rawUrl, { responseType: 'stream' });
-            res.set('Content-Type', fallbackResponse.headers['content-type'] || 'application/pdf');
-            res.set('Content-Disposition', `attachment; filename="${filename}"`);
+            const fallbackResponse = await axios.get(rawUrl, {
+              responseType: 'stream',
+            });
+            res.set(
+              'Content-Type',
+              fallbackResponse.headers['content-type'] || 'application/pdf'
+            );
+            res.set(
+              'Content-Disposition',
+              `attachment; filename="${filename}"`
+            );
             fallbackResponse.data.pipe(res);
             return;
           } catch (fallbackErr) {
             console.error('[CLOUDINARY_FALLBACK_ERROR]', fallbackErr.message);
             if (fallbackErr.response) {
-              console.error('[CLOUDINARY_FALLBACK_STATUS]', fallbackErr.response.status);
+              console.error(
+                '[CLOUDINARY_FALLBACK_STATUS]',
+                fallbackErr.response.status
+              );
             }
           }
         }
@@ -448,13 +476,18 @@ router.get('/paper/:id/download', authenticate, async (req, res) => {
           res.status(502).json({
             success: false,
             message: 'Failed to stream from Cloudinary.',
-            details: err.response ? `Cloudinary ${err.response.status}` : err.message,
+            details: err.response
+              ? `Cloudinary ${err.response.status}`
+              : err.message,
           });
         }
       }
     }
     // ✅ Local file path - legacy uploads from previous system
-    else if (fileUrl.startsWith('/uploads/') || fileUrl.startsWith('uploads/')) {
+    else if (
+      fileUrl.startsWith('/uploads/') ||
+      fileUrl.startsWith('uploads/')
+    ) {
       console.log('[LOCAL_DOWNLOAD]', fileUrl);
       const normalizedPath = fileUrl.replace(/^\/+/, '');
       const localFilePath = path.join(__dirname, '..', normalizedPath);

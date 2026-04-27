@@ -1,21 +1,18 @@
-
 # PeerReview — Academic Paper Review Platform
+
 PeerReview is a web platform that digitizes the academic paper review process. Authors submit their research papers (with PDF), and an admin automatically assigns two reviewers to each one. Reviewers then read the paper and submit a star rating, comments, and a recommendation. The admin reviews all feedback and makes the final Accept or Reject decision. Authors can log back in anytime to see their paper's status, reviewer feedback, and the final editorial decision.
-
-
 
 ## Tech Stack
 
-| Layer       | Technology                                                    |
-| ----------- | ------------------------------------------------------------- |
-| Frontend    | HTML, CSS (inline), Vanilla JS                                |
+| Layer       | Technology                               |
+| ----------- | ---------------------------------------- |
+| Frontend    | HTML, CSS (inline), Vanilla JS           |
 | Fonts       | Segoe UI, Consolas (VSCode system fonts) |
-| Backend     | Node.js + Express                                             |
-| Database    | MongoDB + Mongoose, Cloudinary(for PDFs)                                            |
-| Auth        | JWT (jsonwebtoken)                                            |
-| Passwords   | bcryptjs (hashed)                                             |
-| File Upload | Multer                                                        |
-
+| Backend     | Node.js + Express                        |
+| Database    | MongoDB + Mongoose, Cloudinary(for PDFs) |
+| Auth        | JWT (jsonwebtoken)                       |
+| Passwords   | bcryptjs (hashed)                        |
+| File Upload | Multer                                   |
 
 ## Project Structure
 
@@ -49,6 +46,7 @@ peerreview-final/
 │
 └── uploads/                  ← PDF files saved here automatically
 ```
+
 ## Complete Setup & Run Guide
 
 ## Step 1 — Install Node.js
@@ -64,10 +62,11 @@ npm --version     # should print 9.x.x or higher
 ---
 
 ## Step 2 — Install and Start MongoDB
+
 ## Local MongoDB (run on your own computer)
 
 1. Download MongoDB Community from: https://www.mongodb.com/try/download/community
-2. Install it 
+2. Install it
 3. Start MongoDB:
 
 ```bash
@@ -135,15 +134,12 @@ You should see:
 
 The server auto-creates a default admin account on first run.
 
-
 ## Step 6 — Open the Frontend
 
 Open `client/login.html` directly in your browser.
 
 **Recommended:** Use VS Code with the **Live Server** extension  
 (right-click `login.html` → "Open with Live Server")
-
-
 
 ## Default Login Accounts
 
@@ -152,8 +148,6 @@ Open `client/login.html` directly in your browser.
 | Admin    | admin@review.com | admin123 |
 | Author   | Register via UI  | —        |
 | Reviewer | Register via UI  | —        |
-
-
 
 ## How to Use — Full Workflow
 
@@ -172,7 +166,6 @@ Open `client/login.html` directly in your browser.
 5. Login as Author     →  see final decision + all reviewer feedback on dashboard
 ```
 
-
 ## API Endpoints Reference
 
 | Method | Endpoint              | Who can call     |
@@ -189,6 +182,3 @@ Open `client/login.html` directly in your browser.
 | GET    | /api/stats            | Admin            |
 | GET    | /api/reviewers        | Admin            |
 | GET    | /api/me               | Anyone logged in |
-
-
-

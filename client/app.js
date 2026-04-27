@@ -3,9 +3,11 @@
    No external CSS dependency. Toasts are self-styled.
    ================================================ */
 
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:5000/api'
-  : 'https://peerreview-paper-review-platform.onrender.com/api';
+const API_BASE =
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000/api'
+    : 'https://peerreview-paper-review-platform.onrender.com/api';
 
 /* ── AUTH ───────────────────────────────────────── */
 const Auth = {
@@ -278,40 +280,44 @@ function buildNavbar(activePage) {
     s.id = 'nb-style';
     s.textContent = `
       #navbar {
-        background: #0d1b2a; position: sticky; top: 0; z-index: 100;
+        background: #0d1b2a; 
+        height: 70px;
+        position: sticky; 
+        top: 0; 
+        z-index: 100;
         box-shadow: 0 2px 8px rgba(0,0,0,.15);
       }
       .nb-inner {
         display: flex; align-items: center; justify-content: space-between;
-        height: 60px; max-width: 1140px; margin: 0 auto; padding: 0 24px;
+        height: 70px; max-width: 1140px; margin: 0 auto; padding: 0 24px;
       }
       .nb-brand {
         display: flex; align-items: center; gap: 10px; color: #fff;
-        font-family: 'Segoe UI', Arial, sans-serif; font-size: 1rem;
+        font-family: 'Segoe UI', Arial, sans-serif; font-size: 1.4rem;
         font-weight: 700; text-decoration: none;
       }
       .nb-dot {
         width: 28px; height: 28px; background: #c9a84c; border-radius: 6px;
         display: flex; align-items: center; justify-content: center; font-size: 1rem;
       }
-      .nb-links { display: flex; align-items: center; gap: 4px; list-style: none; }
+      .nb-links { display: flex; align-items: center; gap: 9px; list-style: none; }
       .nb-link {
         color: rgba(255,255,255,.7); font-family: 'Segoe UI', Arial, sans-serif;
-        font-size: .875rem; font-weight: 500; padding: 6px 13px;
+        font-size: 1rem; font-weight: 500; padding: 6px 13px;
         border-radius: 6px; text-decoration: none; transition: background .15s;
       }
       .nb-link:hover  { color: #fff; background: rgba(255,255,255,.1); }
       .nb-link.active { color: #fff; background: rgba(201,168,76,.25); }
       .nb-role {
-        font-size: .7rem; font-weight: 600; padding: 2px 10px; border-radius: 20px;
+        font-size: .9rem; font-weight: 600; padding: 3px 10px; border-radius: 20px;
         background: rgba(201,168,76,.2); color: #e2c47a; text-transform: capitalize;
       }
-      .nb-name { font-size: .82rem; color: rgba(255,255,255,.55); padding: 0 8px;
+      .nb-name { font-size: .95rem; color: rgba(255,255,255,.55); padding: 0 8px;
         font-family: 'Segoe UI', Arial, sans-serif; }
       .nb-logout {
         background: none; border: 1px solid rgba(255,255,255,.2);
         color: rgba(255,255,255,.6); font-family: 'Segoe UI', Arial, sans-serif;
-        font-size: .8rem; padding: 5px 12px; border-radius: 6px; cursor: pointer;
+        font-size: 1rem; padding: 5px 12px; border-radius: 6px; cursor: pointer;
         transition: all .15s;
       }
       .nb-logout:hover { border-color: #c0392b; color: #e57373; background: rgba(192,57,43,.15); }
@@ -427,11 +433,19 @@ async function downloadPaper(endpoint, filename) {
       },
     });
 
-    console.log('Response status:', res.status, 'headers:', Object.fromEntries(res.headers.entries()));
+    console.log(
+      'Response status:',
+      res.status,
+      'headers:',
+      Object.fromEntries(res.headers.entries())
+    );
     if (!res.ok) {
       const data = await res.json().catch(() => null);
       console.error('Download failed:', data);
-      Toast.error('Download failed', data?.message || 'Unable to download PDF.');
+      Toast.error(
+        'Download failed',
+        data?.message || 'Unable to download PDF.'
+      );
       return;
     }
 

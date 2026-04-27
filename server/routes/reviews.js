@@ -145,12 +145,10 @@ router.get(
       res.json({ success: true, reviews });
     } catch (err) {
       console.error('All reviews error:', err);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: 'Server error fetching all reviews.',
-        });
+      res.status(500).json({
+        success: false,
+        message: 'Server error fetching all reviews.',
+      });
     }
   }
 );

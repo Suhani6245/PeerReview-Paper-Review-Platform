@@ -30,7 +30,7 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        padding: 60px 50px;
+        padding: 60px 100px;
       }
       /* Dark overlay so text is readable over any image */
       .left-overlay {
@@ -62,7 +62,7 @@
         font-size: 1.2rem;
       }
       .brand-name {
-        font-size: 1.3rem;
+        font-size: 2rem;
         font-weight: 700;
         color: #fff;
         display: block;
@@ -130,7 +130,7 @@
         font-style: italic;
       }
       .form-sub {
-        font-size: 0.9rem;
+        font-size: 1.25rem;
         color: #7a8899;
         margin-bottom: 28px;
       }
@@ -307,16 +307,31 @@
               Reviewer Login
             </button>
           </div>
-          <div id="selected-role" style="font-size:.9rem;color:#7a8899;margin-bottom:16px">Selected: Admin</div>
+          <div
+            id="selected-role"
+            style="font-size: 0.9rem; color: #7a8899; margin-bottom: 16px"
+          >
+            Selected: Admin
+          </div>
 
           <form id="frm" novalidate autocomplete="off">
             <div class="field">
               <label for="email">Email</label>
-              <input type="email" id="email" autocomplete="off" placeholder="admin@demo.com" />
+              <input
+                type="email"
+                id="email"
+                autocomplete="off"
+                placeholder="admin@demo.com"
+              />
             </div>
             <div class="field">
               <label for="pass">Password</label>
-              <input type="password" id="pass" autocomplete="off" placeholder="Enter password" />
+              <input
+                type="password"
+                id="pass"
+                autocomplete="off"
+                placeholder="Enter password"
+              />
             </div>
             <button type="submit" class="btn-submit" id="sub-btn">
               Sign In →
@@ -349,10 +364,11 @@
           role === 'admin'
             ? 'admin@demo.com'
             : role === 'author'
-            ? 'author@demo.com'
-            : 'reviewer@demo.com';
+              ? 'author@demo.com'
+              : 'reviewer@demo.com';
         passField.placeholder = 'Enter password';
-        roleLabel.textContent = 'Selected: ' + role.charAt(0).toUpperCase() + role.slice(1);
+        roleLabel.textContent =
+          'Selected: ' + role.charAt(0).toUpperCase() + role.slice(1);
       }
 
       selectRole('admin');

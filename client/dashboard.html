@@ -813,10 +813,16 @@
                   : 'Awaiting assignment') +
                 '</span>' +
                 '<div style="display:flex;gap:8px">' +
-                '<button onclick="deletePaper(\'' + p._id + '\', \'' + p.title.replace(/'/g, "\\'") + '\')" class="btn btn-danger btn-sm" style="font-size:.7rem">🗑️ Delete</button>' +
-                '<a href="#" onclick="window.downloadPaper(\'/paper/' + p._id + '/download\', \'' +
-                  p.fileName.replace(/'/g, "\\'") +
-                  '\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
+                '<button onclick="deletePaper(\'' +
+                p._id +
+                "', '" +
+                p.title.replace(/'/g, "\\'") +
+                '\')" class="btn btn-danger btn-sm" style="font-size:.7rem">🗑️ Delete</button>' +
+                '<a href="#" onclick="window.downloadPaper(\'/paper/' +
+                p._id +
+                "/download', '" +
+                p.fileName.replace(/'/g, "\\'") +
+                '\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
                 '</div>' +
                 '</div>' +
                 '</div>'
@@ -875,9 +881,11 @@
                     '</div>'
                   : '') +
                 '<div class="card-foot">' +
-                '<a href="#" onclick="window.downloadPaper(\'/paper/' + p._id + '/download\', \'' +
-                  p.fileName.replace(/'/g, "\\'") +
-                  '\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
+                '<a href="#" onclick="window.downloadPaper(\'/paper/' +
+                p._id +
+                "/download', '" +
+                p.fileName.replace(/'/g, "\\'") +
+                '\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
                 (!done
                   ? '<button class="btn btn-primary btn-sm" onclick="openRevModal(\'' +
                     p._id +
@@ -1007,10 +1015,16 @@
                 (p.reviewers ? p.reviewers.length : 0) +
                 ' reviews</span>' +
                 '<div style="display:flex;gap:8px">' +
-                '<button onclick="deletePaperAdmin(\'' + p._id + '\', \'' + p.title.replace(/'/g, "\\'") + '\')" class="btn btn-danger btn-sm" style="font-size:.7rem">🗑️ Delete</button>' +
-                '<a href="#" onclick="window.downloadPaper(\'/paper/' + p._id + '/download\', \'' +
-                  p.fileName.replace(/'/g, "\\'") +
-                  '\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
+                '<button onclick="deletePaperAdmin(\'' +
+                p._id +
+                "', '" +
+                p.title.replace(/'/g, "\\'") +
+                '\')" class="btn btn-danger btn-sm" style="font-size:.7rem">🗑️ Delete</button>' +
+                '<a href="#" onclick="window.downloadPaper(\'/paper/' +
+                p._id +
+                "/download', '" +
+                p.fileName.replace(/'/g, "\\'") +
+                '\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
                 '</div>' +
                 '</div>' +
                 '</div>'
@@ -1234,7 +1248,13 @@
 
       /* ── DELETE FUNCTIONS ── */
       async function deletePaper(paperId, title) {
-        if (!confirm('Are you sure you want to delete "' + title + '"? This action cannot be undone.')) {
+        if (
+          !confirm(
+            'Are you sure you want to delete "' +
+              title +
+              '"? This action cannot be undone.'
+          )
+        ) {
           return;
         }
 
@@ -1244,21 +1264,36 @@
           if (user.role === 'author') await loadAuthor();
           if (user.role === 'admin') await loadAdmin();
         } else {
-          Toast.error('Delete failed', res && res.data ? res.data.message : 'Error');
+          Toast.error(
+            'Delete failed',
+            res && res.data ? res.data.message : 'Error'
+          );
         }
       }
 
       async function deletePaperAdmin(paperId, title) {
-        if (!confirm('Are you sure you want to delete "' + title + '"? This will also delete all associated reviews. This action cannot be undone.')) {
+        if (
+          !confirm(
+            'Are you sure you want to delete "' +
+              title +
+              '"? This will also delete all associated reviews. This action cannot be undone.'
+          )
+        ) {
           return;
         }
 
         var res = await Api.delete('/admin/paper/' + paperId);
         if (res && res.ok) {
-          Toast.success('Paper deleted', 'The paper and all reviews have been removed.');
+          Toast.success(
+            'Paper deleted',
+            'The paper and all reviews have been removed.'
+          );
           await loadAdmin();
         } else {
-          Toast.error('Delete failed', res && res.data ? res.data.message : 'Error');
+          Toast.error(
+            'Delete failed',
+            res && res.data ? res.data.message : 'Error'
+          );
         }
       }
 

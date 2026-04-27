@@ -97,7 +97,6 @@ const startServer = async () => {
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
-
   } catch (err) {
     console.error('❌ Failed to connect to MongoDB:', err.message);
     process.exit(1);
@@ -127,7 +126,9 @@ const seedDemoUsers = async () => {
     const exists = await User.findOne({ email: userData.email });
     if (!exists) {
       await User.create(userData);
-      console.log(`👤 Demo user created: ${userData.email} / ${userData.password}`);
+      console.log(
+        `👤 Demo user created: ${userData.email} / ${userData.password}`
+      );
     }
   }
 };
