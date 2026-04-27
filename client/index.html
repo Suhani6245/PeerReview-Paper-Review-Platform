@@ -158,6 +158,11 @@
         border-color: #0d1b2a;
         color: #0d1b2a;
       }
+      .role-btn.selected {
+        background: #0d1b2a;
+        color: #fff;
+        border-color: #0d1b2a;
+      }
 
       /* Form fields */
       .field {
@@ -275,30 +280,43 @@
           <h2 class="form-title">Welcome back</h2>
           <p class="form-sub">Sign in to access your dashboard.</p>
 
-          <!-- Quick demo fill -->
+          <!-- User type selector -->
           <div class="demo-row">
             <button
-              class="demo-btn"
-              onclick="fill('author@demo.com', 'demo123')"
+              type="button"
+              class="demo-btn role-btn selected"
+              data-role="admin"
+              onclick="selectRole('admin')"
             >
-              Author Demo
+              Admin Login
             </button>
             <button
-              class="demo-btn"
-              onclick="fill('reviewer@demo.com', 'demo123')"
+              type="button"
+              class="demo-btn role-btn"
+              data-role="author"
+              onclick="selectRole('author')"
             >
-              Reviewer Demo
+              Author Login
+            </button>
+            <button
+              type="button"
+              class="demo-btn role-btn"
+              data-role="reviewer"
+              onclick="selectRole('reviewer')"
+            >
+              Reviewer Login
             </button>
           </div>
+          <div id="selected-role" style="font-size:.9rem;color:#7a8899;margin-bottom:16px">Selected: Admin</div>
 
-          <form id="frm" novalidate>
+          <form id="frm" novalidate autocomplete="off">
             <div class="field">
               <label for="email">Email</label>
-              <input type="email" id="email" placeholder="you@university.edu" />
+              <input type="email" id="email" autocomplete="off" placeholder="admin@review.com" />
             </div>
             <div class="field">
               <label for="pass">Password</label>
-              <input type="password" id="pass" placeholder="••••••••" />
+              <input type="password" id="pass" autocomplete="off" placeholder="Enter password" />
             </div>
             <button type="submit" class="btn-submit" id="sub-btn">
               Sign In →
@@ -316,10 +334,28 @@
     <script>
       if (Auth.isLoggedIn()) window.location.href = 'dashboard.html';
 
-      function fill(email, pass) {
-        document.getElementById('email').value = email;
-        document.getElementById('pass').value = pass;
+      function selectRole(role) {
+        document.querySelectorAll('.role-btn').forEach((btn) => {
+          btn.classList.toggle('selected', btn.dataset.role === role);
+        });
+
+        const emailField = document.getElementById('email');
+        const passField = document.getElementById('pass');
+        const roleLabel = document.getElementById('selected-role');
+
+        emailField.value = '';
+        passField.value = '';
+        emailField.placeholder =
+          role === 'admin'
+            ? 'admin@review.com'
+            : role === 'author'
+            ? 'author@review.com'
+            : 'reviewer@review.com';
+        passField.placeholder = 'Enter password';
+        roleLabel.textContent = 'Selected: ' + role.charAt(0).toUpperCase() + role.slice(1);
       }
+
+      selectRole('admin');
 
       document
         .getElementById('frm')
