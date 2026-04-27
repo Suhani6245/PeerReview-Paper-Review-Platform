@@ -44,12 +44,23 @@ router.post(
             .filter(Boolean)
         : [];
 
+      const fileUrl = req.file?.secure_url || req.file?.url || req.file?.path;
+      const publicId = req.file?.public_id || req.file?.filename;
+
+      if (!fileUrl) {
+        console.error('[UPLOAD_ERROR]', 'Missing file URL on upload', req.file);
+        return res.status(500).json({
+          success: false,
+          message: 'Upload failed: no file URL returned from storage.',
+        });
+      }
+
       const paper = await Paper.create({
         title,
         abstract,
         keywords: keywordArray,
-        fileUrl: req.file.path,
-        publicId: req.file.filename,
+        fileUrl,
+        publicId,
         fileName: req.file.originalname,
         authorId: req.user._id,
         status: 'pending',
