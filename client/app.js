@@ -79,6 +79,9 @@ const Api = {
   postForm(ep, fd) {
     return this.request('POST', ep, fd, true);
   },
+  delete(ep) {
+    return this.request('DELETE', ep);
+  },
 };
 
 /* ── TOAST ───────────────────────────────────────── */

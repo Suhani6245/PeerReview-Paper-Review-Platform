@@ -417,15 +417,38 @@ router.get('/paper/:id/download', authenticate, async (req, res) => {
       console.log('[CLOUDINARY_DOWNLOAD]', fileUrl);
       try {
         const response = await axios.get(fileUrl, { responseType: 'stream' });
-        res.set('Content-Type', 'application/pdf');
+        res.set('Content-Type', response.headers['content-type'] || 'application/pdf');
         res.set('Content-Disposition', `attachment; filename="${filename}"`);
         response.data.pipe(res);
       } catch (err) {
         console.error('[CLOUDINARY_STREAM_ERROR]', err.message);
+        if (err.response) {
+          console.error('[CLOUDINARY_RESPONSE_STATUS]', err.response.status);
+          console.error('[CLOUDINARY_RESPONSE_HEADERS]', err.response.headers);
+        }
+
+        if (err.response?.status === 401 && fileUrl.includes('/image/upload/')) {
+          const rawUrl = fileUrl.replace('/image/upload/', '/raw/upload/');
+          console.log('[CLOUDINARY_FALLBACK]', rawUrl);
+          try {
+            const fallbackResponse = await axios.get(rawUrl, { responseType: 'stream' });
+            res.set('Content-Type', fallbackResponse.headers['content-type'] || 'application/pdf');
+            res.set('Content-Disposition', `attachment; filename="${filename}"`);
+            fallbackResponse.data.pipe(res);
+            return;
+          } catch (fallbackErr) {
+            console.error('[CLOUDINARY_FALLBACK_ERROR]', fallbackErr.message);
+            if (fallbackErr.response) {
+              console.error('[CLOUDINARY_FALLBACK_STATUS]', fallbackErr.response.status);
+            }
+          }
+        }
+
         if (!res.headersSent) {
           res.status(502).json({
             success: false,
             message: 'Failed to stream from Cloudinary.',
+            details: err.response ? `Cloudinary ${err.response.status}` : err.message,
           });
         }
       }
@@ -466,5 +489,115 @@ router.get('/paper/:id/download', authenticate, async (req, res) => {
     }
   }
 });
+
+/**
+ * DELETE /paper/:id
+ * Author deletes their own paper
+ */
+router.delete(
+  '/paper/:id',
+  authenticate,
+  authorize('author'),
+  async (req, res) => {
+    try {
+      const paper = await Paper.findById(req.params.id);
+
+      if (!paper) {
+        return res.status(404).json({
+          success: false,
+          message: 'Paper not found.',
+        });
+      }
+
+      // Only allow author to delete their own paper
+      if (paper.authorId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: 'You can only delete your own papers.',
+        });
+      }
+
+      // Delete associated reviews
+      await Review.deleteMany({ paperId: paper._id });
+
+      // Delete Cloudinary asset if it exists
+      if (paper.publicId && paper.fileUrl?.includes('cloudinary.com')) {
+        try {
+          const cloudinary = require('../config/cloudinary');
+          await cloudinary.uploader.destroy(paper.publicId);
+          console.log('[CLOUDINARY_DELETE]', paper.publicId);
+        } catch (cloudErr) {
+          console.error('[CLOUDINARY_DELETE_ERROR]', cloudErr.message);
+          // Don't fail the whole operation if Cloudinary delete fails
+        }
+      }
+
+      // Delete the paper
+      await Paper.findByIdAndDelete(req.params.id);
+
+      res.json({
+        success: true,
+        message: 'Paper deleted successfully.',
+      });
+    } catch (err) {
+      console.error('[DELETE_PAPER_ERROR]', err.message);
+      res.status(500).json({
+        success: false,
+        message: 'Server error deleting paper.',
+      });
+    }
+  }
+);
+
+/**
+ * DELETE /admin/paper/:id
+ * Admin deletes any paper
+ */
+router.delete(
+  '/admin/paper/:id',
+  authenticate,
+  authorize('admin'),
+  async (req, res) => {
+    try {
+      const paper = await Paper.findById(req.params.id);
+
+      if (!paper) {
+        return res.status(404).json({
+          success: false,
+          message: 'Paper not found.',
+        });
+      }
+
+      // Delete associated reviews
+      await Review.deleteMany({ paperId: paper._id });
+
+      // Delete Cloudinary asset if it exists
+      if (paper.publicId && paper.fileUrl?.includes('cloudinary.com')) {
+        try {
+          const cloudinary = require('../config/cloudinary');
+          await cloudinary.uploader.destroy(paper.publicId);
+          console.log('[CLOUDINARY_DELETE]', paper.publicId);
+        } catch (cloudErr) {
+          console.error('[CLOUDINARY_DELETE_ERROR]', cloudErr.message);
+          // Don't fail the whole operation if Cloudinary delete fails
+        }
+      }
+
+      // Delete the paper
+      await Paper.findByIdAndDelete(req.params.id);
+
+      res.json({
+        success: true,
+        message: 'Paper deleted successfully.',
+      });
+    } catch (err) {
+      console.error('[ADMIN_DELETE_PAPER_ERROR]', err.message);
+      res.status(500).json({
+        success: false,
+        message: 'Server error deleting paper.',
+      });
+    }
+  }
+);
 
 module.exports = router;

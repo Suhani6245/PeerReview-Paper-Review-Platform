@@ -812,9 +812,12 @@
                   ? p.reviewers.length + ' reviewer(s) assigned'
                   : 'Awaiting assignment') +
                 '</span>' +
+                '<div style="display:flex;gap:8px">' +
+                '<button onclick="deletePaper(\'' + p._id + '\', \'' + p.title.replace(/'/g, "\\'") + '\')" class="btn btn-danger btn-sm" style="font-size:.7rem">🗑️ Delete</button>' +
                 '<a href="#" onclick="window.downloadPaper(\'/paper/' + p._id + '/download\', \'' +
                   p.fileName.replace(/'/g, "\\'") +
                   '\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
+                '</div>' +
                 '</div>' +
                 '</div>'
               );
@@ -1003,9 +1006,12 @@
                 '/' +
                 (p.reviewers ? p.reviewers.length : 0) +
                 ' reviews</span>' +
+                '<div style="display:flex;gap:8px">' +
+                '<button onclick="deletePaperAdmin(\'' + p._id + '\', \'' + p.title.replace(/'/g, "\\'") + '\')" class="btn btn-danger btn-sm" style="font-size:.7rem">🗑️ Delete</button>' +
                 '<a href="#" onclick="window.downloadPaper(\'/paper/' + p._id + '/download\', \'' +
                   p.fileName.replace(/'/g, "\\'") +
                   '\')" class="btn btn-outline btn-sm">📥 Download PDF</a>' +
+                '</div>' +
                 '</div>' +
                 '</div>'
               );
@@ -1223,6 +1229,36 @@
           if (user.role === 'reviewer') await loadReviewer();
         } else {
           Toast.error('Failed', res && res.data ? res.data.message : 'Error');
+        }
+      }
+
+      /* ── DELETE FUNCTIONS ── */
+      async function deletePaper(paperId, title) {
+        if (!confirm('Are you sure you want to delete "' + title + '"? This action cannot be undone.')) {
+          return;
+        }
+
+        var res = await Api.delete('/paper/' + paperId);
+        if (res && res.ok) {
+          Toast.success('Paper deleted', 'The paper has been removed.');
+          if (user.role === 'author') await loadAuthor();
+          if (user.role === 'admin') await loadAdmin();
+        } else {
+          Toast.error('Delete failed', res && res.data ? res.data.message : 'Error');
+        }
+      }
+
+      async function deletePaperAdmin(paperId, title) {
+        if (!confirm('Are you sure you want to delete "' + title + '"? This will also delete all associated reviews. This action cannot be undone.')) {
+          return;
+        }
+
+        var res = await Api.delete('/admin/paper/' + paperId);
+        if (res && res.ok) {
+          Toast.success('Paper deleted', 'The paper and all reviews have been removed.');
+          await loadAdmin();
+        } else {
+          Toast.error('Delete failed', res && res.data ? res.data.message : 'Error');
         }
       }
 

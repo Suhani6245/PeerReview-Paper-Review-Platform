@@ -8,7 +8,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: 'peerreview_uploads',
-    resource_type: 'auto', // IMPORTANT for PDFs
+    resource_type: 'raw', // Use raw for PDF download compatibility
     allowed_formats: ['pdf'], // Only allow PDF files
   },
 });
