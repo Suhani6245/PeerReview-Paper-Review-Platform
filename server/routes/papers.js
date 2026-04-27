@@ -20,7 +20,7 @@ router.post(
   async (req, res) => {
     try {
       // ✅ FIX: safe file check for Cloudinary
-      if (!req.file?.path) {
+      if (!req.file) {
         return res.status(400).json({
           success: false,
           message: 'PDF file is required or upload failed.',
@@ -53,6 +53,10 @@ router.post(
           success: false,
           message: 'Upload failed: no file URL returned from storage.',
         });
+      }
+
+      if (!fileUrl.includes('cloudinary.com')) {
+        console.warn('[UPLOAD_WARNING]', 'Uploaded file URL is not Cloudinary:', fileUrl);
       }
 
       const paper = await Paper.create({
