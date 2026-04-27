@@ -9,7 +9,7 @@ PeerReview is a web platform that digitizes the academic paper review process. A
 | Frontend    | HTML, CSS (inline), Vanilla JS           |
 | Fonts       | Segoe UI, Consolas (VSCode system fonts) |
 | Backend     | Node.js + Express                        |
-| Database    | MongoDB + Mongoose, Cloudinary(for PDFs) |
+| Database    | MongoDB + Mongoose, Cloudinary (optional for PDFs) |
 | Auth        | JWT (jsonwebtoken)                       |
 | Passwords   | bcryptjs (hashed)                        |
 | File Upload | Multer                                   |
@@ -21,7 +21,7 @@ peerreview-final/
 │
 ├── client/                   ← Frontend (open these in browser)
 │   ├── app.js                ← Shared JS: Auth, API, Toast, Navbar, Stars
-│   ├── login.html            ← Login page  (put your bg image here)
+│   ├── index.html            ← Login page
 │   ├── register.html         ← Register page
 │   ├── dashboard.html        ← Main dashboard (author / reviewer / admin)
 │   ├── submit.html           ← Submit a paper (author only)
@@ -100,7 +100,17 @@ JWT_SECRET=paste_your_random_secret_here
 
 # Port the server runs on
 PORT=5000
+
+# Cloudinary Configuration (optional for PDF uploads)
+# Sign up at https://cloudinary.com for free account
+# CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+# Or set individually:
+# CLOUDINARY_CLOUD_NAME=your_cloud_name
+# CLOUDINARY_API_KEY=your_api_key
+# CLOUDINARY_API_SECRET=your_api_secret
 ```
+
+**Note:** Cloudinary is optional. If not configured, PDFs will be saved locally in the `uploads/` folder. If you want cloud storage for PDFs, set up a free Cloudinary account and add the credentials above.
 
 ---
 
@@ -136,10 +146,10 @@ The server auto-creates a default admin account on first run.
 
 ## Step 6 — Open the Frontend
 
-Open `client/login.html` directly in your browser.
+Open `client/index.html` directly in your browser.
 
 **Recommended:** Use VS Code with the **Live Server** extension  
-(right-click `login.html` → "Open with Live Server")
+(right-click `index.html` → "Open with Live Server")
 
 ## Default Login Accounts
 
