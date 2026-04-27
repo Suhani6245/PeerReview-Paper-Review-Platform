@@ -11,7 +11,7 @@ PeerReview is a web platform that digitizes the academic paper review process. A
 | Frontend    | HTML, CSS (inline), Vanilla JS                                |
 | Fonts       | Segoe UI, Consolas (VSCode system fonts) |
 | Backend     | Node.js + Express                                             |
-| Database    | MongoDB + Mongoose                                            |
+| Database    | MongoDB + Mongoose, Cloudinary(for PDFs)                                            |
 | Auth        | JWT (jsonwebtoken)                                            |
 | Passwords   | bcryptjs (hashed)                                             |
 | File Upload | Multer                                                        |
