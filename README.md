@@ -155,7 +155,7 @@ Open `client/index.html` directly in your browser.
 
 | Role     | Email            | Password |
 | -------- | ---------------- | -------- |
-| Admin    | admin@review.com | admin123 |
+| Admin    | -                | -        |
 | Author   | Register via UI  | —        |
 | Reviewer | Register via UI  | —        |
 
