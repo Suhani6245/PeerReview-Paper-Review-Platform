@@ -13,6 +13,8 @@ const userRoutes = require('./routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const ORIGINAL_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ORIGINAL_ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 // Allow ALL origins so file://, Live Server, localhost all work without CORS errors
@@ -72,11 +74,11 @@ const seedAdmin = async () => {
   if (!exists) {
     await User.create({
       name: 'Admin',
-      email: 'admin@review.com',
-      password: 'admin123',
+      email: ORIGINAL_ADMIN_EMAIL,
+      password: ORIGINAL_ADMIN_PASSWORD,
       role: 'admin',
     });
-    console.log('👤 Seeded original admin: admin@review.com / admin123');
+    console.log('👤 ADMIN LOGIN SUCCESSFUL');
   }
 };
 

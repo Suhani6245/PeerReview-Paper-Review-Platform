@@ -4,7 +4,8 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const ORIGINAL_ADMIN_EMAIL = 'admin@review.com';
+const ORIGINAL_ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+
 
 /**
  * Helper: Generate JWT token for a user
