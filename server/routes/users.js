@@ -123,11 +123,7 @@ router.delete('/:id', authenticate, authorize('admin'), async (req, res) => {
   }
 });
 
-const express = require('express');
-const router = express.Router();
 
-const User = require('../models/User');
-const { authenticate, authorize } = require('../middleware/auth');
 
 router.delete(
   '/users/:id',
