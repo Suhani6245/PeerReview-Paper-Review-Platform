@@ -586,12 +586,16 @@
             <button class="tab" data-t="users" onclick="switchTab('users')">
               Reviewers
             </button>
+            <button class="tab" data-t="authors" onclick="switchTab('authors')">
+  Authors
+</button>
           </div>
         </div>
 
         <div id="panel-papers"><div class="spinner"></div></div>
         <div id="panel-reviews" class="gone"></div>
         <div id="panel-users" class="gone"></div>
+        <div id="panel-authors" class="gone"></div>
       </div>
     </div>
 
@@ -1119,6 +1123,7 @@
           .classList.toggle('gone', tab !== 'users');
         if (tab === 'reviews') await loadAllReviews();
         if (tab === 'users') await loadAllReviewers();
+        if (tab === 'authors') await loadAllAuthors();
       }
 
       async function loadAllReviews() {
@@ -1200,6 +1205,47 @@
             .join('') +
           '</div>';
       }
+
+      async function loadAllAuthors() {
+  var box = document.getElementById('panel-authors');
+  box.innerHTML = '<div class="spinner"></div>';
+
+  var res = await Api.get('/authors');
+
+  if (!res || !res.ok) {
+    box.innerHTML = '<p>Failed.</p>';
+    return;
+  }
+
+  if (!res.data.authors.length) {
+    box.innerHTML =
+      '<div class="empty"><div class="empty-icon">🧑‍💻</div><h3 class="empty-title">No authors yet</h3></div>';
+    return;
+  }
+
+  box.innerHTML =
+    '<div class="user-grid">' +
+    res.data.authors
+      .map(function (a) {
+        return (
+          '<div class="user-card">' +
+          '<div class="avatar">' +
+          a.name[0].toUpperCase() +
+          '</div>' +
+          '<div>' +
+          '<div style="font-weight:700;font-size:.9rem">' +
+          a.name +
+          '</div>' +
+          '<div style="font-size:.78rem;color:#7a8899">' +
+          a.email +
+          '</div>' +
+          '</div>' +
+          '</div>'
+        );
+      })
+      .join('') +
+    '</div>';
+}
 
       /* ── REVIEW MODAL ── */
       function openRevModal(pid, ptitle) {
