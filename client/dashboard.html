@@ -1217,7 +1217,7 @@
         var box = document.getElementById('panel-authors');
         box.innerHTML = '<div class="spinner"></div>';
 
-        var res = await Api.get('/users/authors');
+        var res = await Api.get('/authors');
 
         if (!res || !res.ok) {
           box.innerHTML = '<p>Failed.</p>';
