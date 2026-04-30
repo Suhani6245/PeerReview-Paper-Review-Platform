@@ -75,20 +75,27 @@ router.get('/stats', authenticate, authorize('admin'), async (req, res) => {
   }
 });
 
-router.get('/authors', authenticate, authorize('admin'), async (req, res) => {
-  try {
-    const authors = await User.find({ role: 'author' }).select('name email');
+router.get(
+  '/authors',
+  authenticate,
+  authorize('admin'),
+  async (req, res) => {
+    try {
+      const authors = await User.find({ role: 'author' }).select(
+        'name email'
+      );
 
-    res.json({
-      success: true,
-      authors,
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch authors',
-    });
+      res.json({
+        success: true,
+        authors,
+      });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch authors',
+      });
+    }
   }
-});
+);
 
 module.exports = router;
