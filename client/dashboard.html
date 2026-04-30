@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://kit.fontawesome.com/a31e373168.js" crossorigin="anonymous"></script>
+    <script
+      src="https://kit.fontawesome.com/a31e373168.js"
+      crossorigin="anonymous"
+    ></script>
     <title>Dashboard — PeerReview</title>
     <style>
       /* ── Base ── */
@@ -587,8 +590,8 @@
               Reviewers
             </button>
             <button class="tab" data-t="authors" onclick="switchTab('authors')">
-  Authors
-</button>
+              Authors
+            </button>
           </div>
         </div>
 
@@ -1121,6 +1124,10 @@
         document
           .getElementById('panel-users')
           .classList.toggle('gone', tab !== 'users');
+
+        document
+          .getElementById('panel-authors')
+          .classList.toggle('gone', tab !== 'authors');
         if (tab === 'reviews') await loadAllReviews();
         if (tab === 'users') await loadAllReviewers();
         if (tab === 'authors') await loadAllAuthors();
@@ -1207,45 +1214,45 @@
       }
 
       async function loadAllAuthors() {
-  var box = document.getElementById('panel-authors');
-  box.innerHTML = '<div class="spinner"></div>';
+        var box = document.getElementById('panel-authors');
+        box.innerHTML = '<div class="spinner"></div>';
 
-  var res = await Api.get('/authors');
+        var res = await Api.get('/users/authors');
 
-  if (!res || !res.ok) {
-    box.innerHTML = '<p>Failed.</p>';
-    return;
-  }
+        if (!res || !res.ok) {
+          box.innerHTML = '<p>Failed.</p>';
+          return;
+        }
 
-  if (!res.data.authors.length) {
-    box.innerHTML =
-      '<div class="empty"><div class="empty-icon">🧑‍💻</div><h3 class="empty-title">No authors yet</h3></div>';
-    return;
-  }
+        if (!res.data.authors.length) {
+          box.innerHTML =
+            '<div class="empty"><div class="empty-icon">🧑‍💻</div><h3 class="empty-title">No authors yet</h3></div>';
+          return;
+        }
 
-  box.innerHTML =
-    '<div class="user-grid">' +
-    res.data.authors
-      .map(function (a) {
-        return (
-          '<div class="user-card">' +
-          '<div class="avatar">' +
-          a.name[0].toUpperCase() +
-          '</div>' +
-          '<div>' +
-          '<div style="font-weight:700;font-size:.9rem">' +
-          a.name +
-          '</div>' +
-          '<div style="font-size:.78rem;color:#7a8899">' +
-          a.email +
-          '</div>' +
-          '</div>' +
-          '</div>'
-        );
-      })
-      .join('') +
-    '</div>';
-}
+        box.innerHTML =
+          '<div class="user-grid">' +
+          res.data.authors
+            .map(function (a) {
+              return (
+                '<div class="user-card">' +
+                '<div class="avatar">' +
+                a.name[0].toUpperCase() +
+                '</div>' +
+                '<div>' +
+                '<div style="font-weight:700;font-size:.9rem">' +
+                a.name +
+                '</div>' +
+                '<div style="font-size:.78rem;color:#7a8899">' +
+                a.email +
+                '</div>' +
+                '</div>' +
+                '</div>'
+              );
+            })
+            .join('') +
+          '</div>';
+      }
 
       /* ── REVIEW MODAL ── */
       function openRevModal(pid, ptitle) {

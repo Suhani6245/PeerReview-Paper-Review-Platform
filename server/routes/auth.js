@@ -6,7 +6,6 @@ const User = require('../models/User');
 
 const ORIGINAL_ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
-
 /**
  * Helper: Generate JWT token for a user
  */

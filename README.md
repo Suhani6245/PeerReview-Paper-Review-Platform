@@ -4,15 +4,15 @@ PeerReview is a web platform that digitizes the academic paper review process. A
 
 ## Tech Stack
 
-| Layer       | Technology                               |
-| ----------- | ---------------------------------------- |
-| Frontend    | HTML, CSS (inline), Vanilla JS           |
-| Fonts       | Segoe UI, Consolas (VSCode system fonts) |
-| Backend     | Node.js + Express                        |
+| Layer       | Technology                                         |
+| ----------- | -------------------------------------------------- |
+| Frontend    | HTML, CSS (inline), Vanilla JS                     |
+| Fonts       | Segoe UI, Consolas (VSCode system fonts)           |
+| Backend     | Node.js + Express                                  |
 | Database    | MongoDB + Mongoose, Cloudinary (optional for PDFs) |
-| Auth        | JWT (jsonwebtoken)                       |
-| Passwords   | bcryptjs (hashed)                        |
-| File Upload | Multer                                   |
+| Auth        | JWT (jsonwebtoken)                                 |
+| Passwords   | bcryptjs (hashed)                                  |
+| File Upload | Multer                                             |
 
 ## Project Structure
 
@@ -153,11 +153,11 @@ Open `client/index.html` directly in your browser.
 
 ## Default Login Accounts
 
-| Role     | Email            | Password |
-| -------- | ---------------- | -------- |
-| Admin    | -                | -        |
-| Author   | Register via UI  | —        |
-| Reviewer | Register via UI  | —        |
+| Role     | Email           | Password |
+| -------- | --------------- | -------- |
+| Admin    | -               | -        |
+| Author   | Register via UI | —        |
+| Reviewer | Register via UI | —        |
 
 ## How to Use — Full Workflow
 
