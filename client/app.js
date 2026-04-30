@@ -31,11 +31,11 @@ const Auth = {
   },
   logout() {
     this.clear();
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
   },
   requireAuth(role) {
     if (!this.isLoggedIn()) {
-      window.location.href = 'login.html';
+      window.location.href = 'index.html';
       return null;
     }
     const user = this.getUser();
@@ -61,7 +61,7 @@ const Api = {
       const data = await res.json();
       if (res.status === 401) {
         Auth.clear();
-        window.location.href = 'login.html';
+        window.location.href = 'index.html';
         return null;
       }
       return { ok: res.ok, data };
@@ -339,7 +339,7 @@ function buildNavbar(activePage) {
   const links = linkMap[user.role] || [];
   nav.innerHTML =
     '<div class="nb-inner">' +
-    '<a href="dashboard.html" class="nb-brand"><div class="nb-dot">📋</div>PeerReview</a>' +
+    '<a href="dashboard.html" class="nb-brand"><div class="nb-dot"><i class="fa-solid fa-book fa-2x"></i></div>PeerReview</a>' +
     '<ul class="nb-links">' +
     links
       .map(
