@@ -1175,16 +1175,20 @@
       async function loadAllReviewers() {
         var box = document.getElementById('panel-users');
         box.innerHTML = '<div class="spinner"></div>';
+
         var res = await Api.get('/reviewers');
+
         if (!res || !res.ok) {
           box.innerHTML = '<p>Failed.</p>';
           return;
         }
+
         if (!res.data.reviewers.length) {
           box.innerHTML =
             '<div class="empty"><div class="empty-icon">👤</div><h3 class="empty-title">No reviewers yet</h3></div>';
           return;
         }
+
         box.innerHTML =
           '<div class="user-grid">' +
           res.data.reviewers
@@ -1194,7 +1198,8 @@
                 '<div class="avatar">' +
                 r.name[0].toUpperCase() +
                 '</div>' +
-                '<div><div style="font-weight:700;font-size:.9rem">' +
+                '<div style="flex:1">' +
+                '<div style="font-weight:700;font-size:.9rem">' +
                 r.name +
                 '</div>' +
                 '<div style="font-size:.78rem;color:#7a8899">' +
@@ -1205,6 +1210,13 @@
                     r.expertise +
                     '</div>'
                   : '') +
+                '<button onclick="deleteUser(\'' +
+                r._id +
+                "', '" +
+                r.name.replace(/'/g, "\\'") +
+                '\')" class="btn btn-danger btn-sm" style="margin-top:10px;font-size:.72rem">' +
+                '🗑 Delete Reviewer' +
+                '</button>' +
                 '</div>' +
                 '</div>'
               );
@@ -1239,19 +1251,53 @@
                 '<div class="avatar">' +
                 a.name[0].toUpperCase() +
                 '</div>' +
-                '<div>' +
+                '<div style="flex:1">' +
                 '<div style="font-weight:700;font-size:.9rem">' +
                 a.name +
                 '</div>' +
                 '<div style="font-size:.78rem;color:#7a8899">' +
                 a.email +
                 '</div>' +
+                '<button onclick="deleteUser(\'' +
+                a._id +
+                "', '" +
+                a.name.replace(/'/g, "\\'") +
+                '\')" class="btn btn-danger btn-sm" style="margin-top:10px;font-size:.72rem">' +
+                '🗑 Delete Author' +
+                '</button>' +
                 '</div>' +
                 '</div>'
               );
             })
             .join('') +
           '</div>';
+      }
+
+      //Remove Author/Reviewer
+      async function deleteUser(userId, userName) {
+        if (
+          !confirm(
+            'Are you sure you want to delete "' +
+              userName +
+              '"? This action cannot be undone.'
+          )
+        ) {
+          return;
+        }
+
+        var res = await Api.delete('/users/' + userId);
+
+        if (res && res.ok) {
+          Toast.success('User deleted successfully');
+
+          await loadAllReviewers();
+          await loadAllAuthors();
+        } else {
+          Toast.error(
+            'Delete failed',
+            res && res.data ? res.data.message : 'Error'
+          );
+        }
       }
 
       /* ── REVIEW MODAL ── */
