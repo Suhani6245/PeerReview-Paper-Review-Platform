@@ -826,7 +826,7 @@
                 "', '" +
                 p.title.replace(/'/g, "\\'") +
                 '\')" class="btn btn-danger btn-sm" style="font-size:.7rem">🗑️ Delete</button>' +
-                '<a href="#" onclick="window.downloadPaper(\'/paper/' +
+                '<a href="javascript:void(0)" onclick="window.downloadPaper(\'/paper/' +
                 p._id +
                 "/download', '" +
                 p.fileName.replace(/'/g, "\\'") +
@@ -1009,10 +1009,10 @@
                     '<div class="dec-btns">' +
                     '<button class="btn btn-success btn-sm" onclick="confirmDecision(\'' +
                     p._id +
-                    "','accept',this)\">✓ Accept</button>" +
-                    '<button class="btn btn-danger btn-sm"  onclick="confirmDecision(\'' +
+                    "', 'accept', this)\">✓ Accept</button>" +
+                    '<button class="btn btn-danger btn-sm" onclick="confirmDecision(\'' +
                     p._id +
-                    "','reject',this)\">✕ Reject</button>" +
+                    "', 'reject', this)\">✕ Reject</button>" +
                     '</div>' +
                     '</div>'
                   : '') +
@@ -1196,7 +1196,7 @@
               return (
                 '<div class="user-card">' +
                 '<div class="avatar">' +
-                r.name[0].toUpperCase() +
+                (r.name || '?')[0].toUpperCase() +
                 '</div>' +
                 '<div style="flex:1">' +
                 '<div style="font-weight:700;font-size:.9rem">' +
@@ -1249,7 +1249,7 @@
               return (
                 '<div class="user-card">' +
                 '<div class="avatar">' +
-                a.name[0].toUpperCase() +
+                (a.name || '?')[0].toUpperCase() +
                 '</div>' +
                 '<div style="flex:1">' +
                 '<div style="font-weight:700;font-size:.9rem">' +
@@ -1273,42 +1273,44 @@
           '</div>';
       }
 
-      //Remove Author/Reviewer
-      async function deleteUser(userId, userName) {
-        if (
-          !confirm(
-            'Are you sure you want to delete "' +
-              userName +
-              '"? This action cannot be undone.'
-          )
-        ) {
-          return;
-        }
+      /* ── CUSTOM DELETE USER POPUP ── */
+      function deleteUser(userId, userName) {
+        document.getElementById('delete-user-msg').textContent =
+          'Are you sure you want to delete this user?';
 
-        var res = await Api.delete('/users/' + userId);
+        document.getElementById('delete-user-name').textContent =
+          '"' + userName + '"';
 
-        if (res && res.ok) {
-          Toast.success('User deleted successfully');
+        var confirmBtn = document.getElementById('delete-user-confirm-btn');
 
-          await loadAllReviewers();
-          await loadAllAuthors();
-        } else {
-          Toast.error(
-            'Delete failed',
-            res && res.data ? res.data.message : 'Error'
-          );
-        }
-      }
+        confirmBtn.onclick = async function () {
+          setLoading(confirmBtn, true);
 
-      /* ── REVIEW MODAL ── */
-      function openRevModal(pid, ptitle) {
-        document.getElementById('rev-pid').value = pid;
-        document.getElementById('rev-ptitle').textContent = '"' + ptitle + '"';
-        document.getElementById('rev-rating').value = '0';
-        document.getElementById('rev-comment').value = '';
-        document.getElementById('rev-rec').value = '';
-        initStars('rev-stars', 'rev-rating');
-        openModal('rev-modal');
+          var res = await Api.delete('/users/' + userId);
+
+          setLoading(confirmBtn, false);
+
+          if (res && res.ok) {
+            closeModal('delete-user-modal');
+
+            Toast.success('User deleted successfully');
+
+            if (document.querySelector('.tab.on')?.dataset.t === 'users') {
+              await loadAllReviewers();
+            }
+
+            if (document.querySelector('.tab.on')?.dataset.t === 'authors') {
+              await loadAllAuthors();
+            }
+          } else {
+            Toast.error(
+              'Delete failed',
+              res && res.data ? res.data.message : 'Error'
+            );
+          }
+        };
+
+        openModal('delete-user-modal');
       }
 
       async function submitReview() {
@@ -1402,5 +1404,43 @@
       if (user.role === 'reviewer') loadReviewer();
       if (user.role === 'admin') loadAdmin();
     </script>
+
+    <!-- ── DELETE USER MODAL ── -->
+    <div class="modal-bg" id="delete-user-modal" data-modal="overlay">
+      <div class="modal-box" style="max-width: 420px">
+        <div class="modal-head">
+          <span class="modal-title">Delete User</span>
+          <button class="modal-x" onclick="closeModal('delete-user-modal')">
+            ×
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="confirm-icon">🗑️</div>
+
+          <p class="confirm-msg" id="delete-user-msg">Are you sure?</p>
+
+          <p class="confirm-sub" id="delete-user-name"></p>
+
+          <div class="confirm-note note-err">
+            <span>⚠</span>
+            <span> This action is permanent and cannot be undone. </span>
+          </div>
+        </div>
+
+        <div class="modal-foot">
+          <button
+            class="btn btn-outline btn-sm"
+            onclick="closeModal('delete-user-modal')"
+          >
+            Cancel
+          </button>
+
+          <button class="btn btn-danger btn-sm" id="delete-user-confirm-btn">
+            🗑 Delete
+          </button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

@@ -123,8 +123,6 @@ router.delete('/:id', authenticate, authorize('admin'), async (req, res) => {
   }
 });
 
-
-
 router.delete(
   '/users/:id',
   authenticate,
