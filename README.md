@@ -139,7 +139,7 @@ You should see:
 
 ```
 ✅ Connected to MongoDB
-👤 Default admin created: admin@review.com / admin123
+👤 Default admin created: adm@demo.com / ********
 🚀 Server running on http://localhost:5000
 ```
 
