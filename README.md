@@ -24,6 +24,7 @@ peerreview-final/
 │   ├── index.html            ← Login page
 │   ├── register.html         ← Register page
 │   ├── dashboard.html        ← Main dashboard (author / reviewer / admin)
+|   ├── dashboard.css
 │   ├── submit.html           ← Submit a paper (author only)
 │   └── review.html           ← Write a review (reviewer only)
 │
